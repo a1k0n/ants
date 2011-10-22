@@ -16,7 +16,7 @@ struct Square
     DIST_ENEMY_HILL = 4,
     NUM_DISTANCES = 5
   };
-  int distance[NUM_DISTANCES], direction[NUM_DISTANCES];
+  int distance[NUM_DISTANCES];
   //std::vector<int> deadAnts; // we don't really need to track these do we?
 
   Square()

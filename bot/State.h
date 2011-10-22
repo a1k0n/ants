@@ -14,11 +14,6 @@
 #include "Square.h"
 #include "Location.h"
 
-// constants
-const int TDIRECTIONS = 4;
-const char CDIRECTIONS[4] = {'N', 'E', 'S', 'W'};
-const int DIRECTIONS[4][2] = { {-1, 0}, {0, 1}, {1, 0}, {0, -1} };      //{N, E, S, W}
-
 // struct to store current state information
 struct State
 {
@@ -31,7 +26,7 @@ struct State
   std::vector<double> scores;
   bool gameover;
 
-  std::vector<std::vector<Square> > grid;
+  std::vector<std::vector<Square> > grid_;
   std::vector<Location> myAnts, enemyAnts, myHills, enemyHills, food;
 
   Timer timer;
@@ -46,7 +41,12 @@ struct State
   void makeMove(const Location &loc, int direction);
 
   double distance(const Location &loc1, const Location &loc2);
-  Location getLocation(const Location &startLoc, int direction);
+
+  const Square& grid(const Location &l) const { return grid_[l.row][l.col]; }
+  Square& grid(const Location &l) { return grid_[l.row][l.col]; }
+
+  const Square& grid(int r, int c) const { return grid_[r][c]; }
+  Square& grid(int r, int c) { return grid_[r][c]; }
 
   void updateVisionInformation();
   void updateDistanceInformation();

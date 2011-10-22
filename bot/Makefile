@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-O3 -funroll-loops -c
+CFLAGS=-O3 -g -funroll-loops -c
 LDFLAGS=-O2 -lm
 SOURCES=Bot.cc MyBot.cc State.cc
 OBJECTS=$(SOURCES:.cc=.o)
