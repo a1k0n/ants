@@ -1,4 +1,5 @@
 #include "Bot.h"
+#include <limits.h>
 
 using namespace std;
 
@@ -51,10 +52,13 @@ re_pick:
     int food_dist = s.distance[Square::DIST_FOOD];
     int hive_dist = s.distance[Square::DIST_ENEMY_HILL];
     int frontier_dist = s.distance[Square::DIST_FRONTIER];
+    int invisible_dist = s.distance[Square::DIST_INVISIBLE];
     // only go for the frontier if we can't see any food
     // this is backwards though.. we need to assign food to ants, not vice versa
     if(food_dist == INT_MAX)
       food_dist = frontier_dist;
+    if(food_dist == INT_MAX)
+      food_dist = invisible_dist;
     int cost = std::min(hive_dist, food_dist);
     if(cost < bestcost || (cost == bestcost && coinflip(0.33))) {
       bestcost = cost;

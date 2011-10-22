@@ -1,4 +1,5 @@
 #include "State.h"
+#include <limits.h>
 
 using namespace std;
 
@@ -79,6 +80,7 @@ void State::updateVisionInformation()
 
     std::vector<std::vector<bool> > visited(rows, std::vector<bool>(cols, 0));
     grid(sLoc).isVisible = 1;
+    grid(sLoc).isExplored = 1;
     visited[sLoc.row][sLoc.col] = 1;
 
     while(!locQueue.empty())
@@ -93,6 +95,7 @@ void State::updateVisionInformation()
         if(!visited[nLoc.row][nLoc.col] && distance(sLoc, nLoc) <= viewradius)
         {
           grid(nLoc).isVisible = 1;
+          grid(nLoc).isExplored = 1;
           locQueue.push(nLoc);
         }
         visited[nLoc.row][nLoc.col] = 1;
@@ -113,7 +116,7 @@ void State::updateDistanceInformation()
   std::vector<Location> frontier;
   for(int r=0;r<rows;r++) {
     for(int c=0;c<cols;c++) {
-      if(!grid(r,c).isVisible) {
+      if(!grid(r,c).isExplored && !grid(r,c).isWater) {
         frontier.push_back(Location(r,c));
       }
     }
@@ -172,12 +175,15 @@ ostream& operator<<(ostream &os, const State &state)
         os << (char)('a' + s.ant);
       else if(s.isVisible)
         os << '.';
+      else if(s.isExplored)
+        os << '/';
       else
         os << '?';
     }
     os << endl;
   }
 
+#if 0
   for(int row=0; row<state.rows; row++)
   {
     for(int col=0; col<state.cols; col++)
@@ -190,6 +196,7 @@ ostream& operator<<(ostream &os, const State &state)
     }
     os << endl;
   }
+#endif
 
   return os;
 }

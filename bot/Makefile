@@ -20,5 +20,9 @@ clean:
 	-rm -f ${EXECUTABLE} ${OBJECTS} *.d
 	-rm -f debug.txt
 
-.PHONY: all clean
+submit:
+	rm -f submission.zip
+	zip submission.zip *.cc *.h
+
+.PHONY: all clean submit
 
