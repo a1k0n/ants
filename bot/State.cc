@@ -30,8 +30,6 @@ void State::reset()
   myAnts.clear();
   enemyAnts.clear();
   myHills.clear();
-  enemyHills.clear();
-  food.clear();
   for(int row=0; row<rows; row++)
     for(int col=0; col<cols; col++)
       if(!grid(row,col).isWater)
@@ -60,14 +58,14 @@ double State::distance(const Location &loc1, const Location &loc2)
 }
 
 /*
-   This function will update update the lastSeen value for any squares currently
-   visible by one of your live ants.
+   This function will update update the lastSeen value for any squares
+   currently visible by one of your live ants.
 
-   BE VERY CAREFUL IF YOU ARE GOING TO TRY AND MAKE THIS FUNCTION MORE EFFICIENT,
-   THE OBVIOUS WAY OF TRYING TO IMPROVE IT BREAKS USING THE EUCLIDEAN METRIC, FOR
-   A CORRECT MORE EFFICIENT IMPLEMENTATION, TAKE A LOOK AT THE GET_VISION FUNCTION
-   IN ANTS.PY ON THE CONTESTS GITHUB PAGE.
-   */
+   BE VERY CAREFUL IF YOU ARE GOING TO TRY AND MAKE THIS FUNCTION MORE
+   EFFICIENT, THE OBVIOUS WAY OF TRYING TO IMPROVE IT BREAKS USING THE
+   EUCLIDEAN METRIC, FOR A CORRECT MORE EFFICIENT IMPLEMENTATION, TAKE A LOOK
+   AT THE GET_VISION FUNCTION IN ANTS.PY ON THE CONTESTS GITHUB PAGE.
+ */
 void State::updateVisionInformation()
 {
   std::queue<Location> locQueue;
@@ -81,6 +79,7 @@ void State::updateVisionInformation()
     std::vector<std::vector<bool> > visited(rows, std::vector<bool>(cols, 0));
     grid(sLoc).isVisible = 1;
     grid(sLoc).isExplored = 1;
+    grid(sLoc).lastSeen = turn;
     visited[sLoc.row][sLoc.col] = 1;
 
     while(!locQueue.empty())
@@ -96,6 +95,7 @@ void State::updateVisionInformation()
         {
           grid(nLoc).isVisible = 1;
           grid(nLoc).isExplored = 1;
+          grid(nLoc).lastSeen = turn;
           locQueue.push(nLoc);
         }
         visited[nLoc.row][nLoc.col] = 1;
@@ -104,15 +104,40 @@ void State::updateVisionInformation()
   }
 }
 
+// requires updated visibility information
+void State::updateStateEstimate()
+{
+  // delete any visible enemy hills which are no longer present
+  std::set<Location>::iterator i = enemyHills.begin();
+  while(i != enemyHills.end()) {
+    std::set<Location>::iterator cur_it = i++;
+    const Square &s = grid(*cur_it);
+    if(s.isVisible && !s.isHill)
+      enemyHills.erase(cur_it);
+  }
+
+  // delete any visible food which has disappeared
+  i = food.begin();
+  while(i != food.end()) {
+    std::set<Location>::iterator cur_it = i++;
+    const Square &s = grid(*cur_it);
+    if(s.isVisible && !s.isFood)
+      food.erase(cur_it);
+  }
+}
+
 void State::updateDistanceInformation()
 {
   // compute pathfinding info for food, hills, etc
-  bfs(food, Square::DIST_FOOD);
+  bfs(std::vector<Location>(food.begin(), food.end()),
+      Square::DIST_FOOD);
   bfs(enemyAnts, Square::DIST_ENEMY_ANTS);
   bfs(myHills, Square::DIST_OUR_HILL);
-  bfs(enemyHills, Square::DIST_ENEMY_HILL);
+  bfs(std::vector<Location>(enemyHills.begin(), enemyHills.end()),
+      Square::DIST_ENEMY_HILL);
 
-  // compute pathfinding info for frontier by starting with all invisible squares
+  // compute pathfinding info for frontier by starting with all invisible
+  // squares
   std::vector<Location> frontier;
   for(int r=0;r<rows;r++) {
     for(int c=0;c<cols;c++) {
@@ -279,7 +304,7 @@ istream& operator>>(istream &is, State &state)
       {
         is >> row >> col;
         state.grid(row,col).isFood = 1;
-        state.food.push_back(Location(row, col));
+        state.food.insert(Location(row, col));
       }
       else if(inputType == "a") //live ant square
       {
@@ -303,7 +328,7 @@ istream& operator>>(istream &is, State &state)
         if(player == 0)
           state.myHills.push_back(Location(row, col));
         else
-          state.enemyHills.push_back(Location(row, col));
+          state.enemyHills.insert(Location(row, col));
 
       }
       else if(inputType == "players") //player information

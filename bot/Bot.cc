@@ -6,7 +6,6 @@ using namespace std;
 //constructor
 Bot::Bot()
 {
-
 }
 
 //plays a single game of Ants.
@@ -21,6 +20,7 @@ void Bot::playGame()
   while(cin >> state)
   {
     state.updateVisionInformation();
+    state.updateStateEstimate();
     state.updateDistanceInformation();
     makeMoves();
     endTurn();

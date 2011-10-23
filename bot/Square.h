@@ -6,8 +6,13 @@
 // struct for representing a square in the grid.
 struct Square
 {
-  bool isVisible, isWater, isHill, isFood, isExplored;
+  bool isVisible:1,
+       isWater:1,
+       isHill:1,
+       isFood:1,
+       isExplored:1;
   int ant, hillPlayer;
+  int lastSeen;
   enum {
     DIST_FOOD = 0,
     DIST_FRONTIER = 1,

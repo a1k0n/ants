@@ -7,6 +7,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <set>
 #include <queue>
 #include <stack>
 
@@ -27,7 +28,8 @@ struct State
   bool gameover;
 
   std::vector<std::vector<Square> > grid_;
-  std::vector<Location> myAnts, enemyAnts, myHills, enemyHills, food;
+  std::vector<Location> myAnts, enemyAnts, myHills;
+  std::set<Location> enemyHills, food;
 
   Timer timer;
 
@@ -49,6 +51,7 @@ struct State
   Square& grid(int r, int c) { return grid_[r][c]; }
 
   void updateVisionInformation();
+  void updateStateEstimate();
   void updateDistanceInformation();
 
  private:
