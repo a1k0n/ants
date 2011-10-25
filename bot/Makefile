@@ -20,9 +20,17 @@ clean:
 	-rm -f ${EXECUTABLE} ${OBJECTS} *.d
 	-rm -f debug.txt
 
+depend:
+	makedepend -Y *.cc
+
 submit:
 	rm -f submission.zip
 	zip submission.zip *.cc *.h
 
-.PHONY: all clean submit
+.PHONY: all clean submit depend
 
+# DO NOT DELETE
+
+Bot.o: Bot.h State.h Timer.h Square.h Location.h
+MyBot.o: Bot.h State.h Timer.h Square.h Location.h
+State.o: State.h Timer.h Square.h Location.h

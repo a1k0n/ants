@@ -27,6 +27,29 @@ void Bot::playGame()
   }
 }
 
+double Bot::evaluate()
+{
+  double score = 0;
+  // - count up number of our ants; each ant is worth 1
+  score += state.myAnts.size();
+  // - count up number of enemy ants; each ant is worth -1
+  score -= state.enemyAnts.size();
+  // - consequently, obtaining food is worth 1 -- food is thus worth
+  //   max{i}(1*discount^dist_to_ant[i]); discount is 0.9 or something
+  // - count up hills; each is worth 2000 (losing it loses 2000 points)
+  score += 2000*state.myHills.size();
+  // - smashing an enemy hill is worth 1000; if an ant moves onto one without
+  //   getting killed... in other words, known existing enemy hills are worth
+  //   -1000. (but the act of scouting one is positive, not negative)
+  score -= 1000*state.enemyHills.size();
+  // - consider potential enemy ants in unseen locations -- an unseen enemy ant
+  //   could smash our hill in N turns, so the penalty would be
+  //   -2000*discount^N*p(ant@N)
+  // - consider potential food in unseen locations
+  //   (1*discount^dist_to_ant_xy)*p(food@xy) for each location revealed
+  return score;
+}
+
 static bool coinflip(float threshold)
 {
   return drand48() <= threshold;

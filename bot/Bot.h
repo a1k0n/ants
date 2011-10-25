@@ -16,6 +16,8 @@ struct Bot
 
   Bot();
 
+  double evaluate();
+
   void playGame();    //plays a single game of Ants
 
   int moveAnt(Location l);

@@ -6,13 +6,13 @@
 // struct for representing a square in the grid.
 struct Square
 {
-  bool isVisible:1,
-       isWater:1,
+  bool isWater:1,
        isHill:1,
        isFood:1,
        isExplored:1;
   int ant, hillPlayer;
-  int lastSeen;
+  int lastSeen;   // turn# that this square was last observed by an ant
+  int visibility; // number of ants who can see this square
   enum {
     DIST_FOOD = 0,
     DIST_FRONTIER = 1,
@@ -27,14 +27,15 @@ struct Square
 
   Square()
   {
-    isVisible = isExplored = isWater = isHill = isFood = 0;
+    isExplored = isWater = isHill = isFood = 0;
+    visibility = 0;
     ant = hillPlayer = -1;
   }
 
   //resets the information for the square except water information
   void reset()
   {
-    isVisible = 0;
+    visibility = 0;
     isHill = 0;
     isFood = 0;
     ant = hillPlayer = -1;
