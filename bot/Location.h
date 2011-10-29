@@ -22,13 +22,23 @@ struct Location
   }
 
   Location next(int direction) const {
+    if(direction == -1) return *this;
     return Location((row + DIRECTIONS[direction][0] + rows) % rows,
                     (col + DIRECTIONS[direction][1] + cols) % cols );
+  }
+  Location prev(int direction) const {
+    if(direction == -1) return *this;
+    return Location((row - DIRECTIONS[direction][0] + rows) % rows,
+                    (col - DIRECTIONS[direction][1] + cols) % cols );
   }
 };
 
 static bool operator<(const Location &a, const Location &b) {
   return a.row == b.row ? a.col < b.col : a.row < b.row;
+}
+
+static Location operator+(const Location &a, const Location &b) {
+  return Location(a.row+b.row, a.col+b.col);
 }
 
 #endif //LOCATION_H_

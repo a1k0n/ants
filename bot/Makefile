@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-O3 -g -funroll-loops -c
 LDFLAGS=-O2 -lm
-SOURCES=Bot.cc MyBot.cc State.cc
+SOURCES=$(wildcard *.cc)
 OBJECTS=$(SOURCES:.cc=.o)
 EXECUTABLE=MyBot
 
@@ -31,6 +31,9 @@ submit:
 
 # DO NOT DELETE
 
-Bot.o: Bot.h State.h Timer.h Square.h Location.h
-MyBot.o: Bot.h State.h Timer.h Square.h Location.h
-State.o: State.h Timer.h Square.h Location.h
+Ant.o: Ant.h Location.h State.h Food.h Grid.h Square.h Timer.h
+Bot.o: Bot.h State.h Ant.h Location.h Food.h Grid.h Square.h Timer.h
+Food.o: Food.h Ant.h Location.h Grid.h Square.h State.h Timer.h
+Grid.o: Grid.h Location.h
+MyBot.o: Bot.h State.h Ant.h Location.h Food.h Grid.h Square.h Timer.h
+State.o: State.h Ant.h Location.h Food.h Grid.h Square.h Timer.h

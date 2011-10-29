@@ -21,7 +21,7 @@ State::~State()
 //sets the state up
 void State::setup()
 {
-  grid_ = vector<vector<Square> >(rows, vector<Square>(cols, Square()));
+  grid.Resize(rows, cols);
 }
 
 //resets all non-water squares to land and clears the bots ant vector
@@ -37,14 +37,9 @@ void State::reset()
 }
 
 //outputs move information to the engine
-void State::makeMove(const Location &loc, int direction)
+void State::CommitMove(const Location &loc, int direction)
 {
   cout << "o " << loc.row << " " << loc.col << " " << CDIRECTIONS[direction] << endl;
-
-  // NOTE: the myAnts array needs to be synchronized separately if we do this
-  Location nLoc = loc.next(direction);
-  grid(nLoc).ant = grid(loc).ant;
-  grid(loc).ant = -1;
 }
 
 //returns the euclidean distance between two locations with the edges wrapped
@@ -74,31 +69,23 @@ void State::computeCircleDelta(const Location &delta,
   }
 }
 
-void State::updateAntVisibility(Location l)
+void State::updateAntVisibility(Ant &a)
 {
+  const Location &l = a.pos_;
   int x0 = wrapCol(l.col - viewBoxSize),
       y0 = wrapRow(l.row - viewBoxSize);
   int r, c, dx, dy;
   for(c = x0, dx = -viewBoxSize; dx <= viewBoxSize; dx++, c = c == cols-1 ? 0:c+1) {
     for(r = y0, dy = -viewBoxSize; dy <= viewBoxSize; dy++, r = r == rows-1 ? 0:r+1) {
       if(dx*dx + dy*dy <= viewradius2) {
-        grid_[r][c].visibility ++;
-        grid_[r][c].isExplored = true;
-        grid_[r][c].lastSeen = turn;
+        grid(r,c).visibility ++;
+        grid(r,c).isExplored = true;
+        grid(r,c).lastSeen = turn;
       }
     }
   }
 }
 
-/*
-   This function will update update the lastSeen value for any squares
-   currently visible by one of your live ants.
-
-   BE VERY CAREFUL IF YOU ARE GOING TO TRY AND MAKE THIS FUNCTION MORE
-   EFFICIENT, THE OBVIOUS WAY OF TRYING TO IMPROVE IT BREAKS USING THE
-   EUCLIDEAN METRIC, FOR A CORRECT MORE EFFICIENT IMPLEMENTATION, TAKE A LOOK
-   AT THE GET_VISION FUNCTION IN ANTS.PY ON THE CONTESTS GITHUB PAGE.
- */
 void State::updateVisionInformation()
 {
   for(int a=0; a<(int) myAnts.size(); a++)
@@ -118,10 +105,10 @@ void State::updateStateEstimate()
   }
 
   // delete any visible food which has disappeared
-  i = food.begin();
-  while(i != food.end()) {
-    set<Location>::iterator cur_it = i++;
-    const Square &s = grid(*cur_it);
+  map<Location, Food>::iterator j = food.begin();
+  while(j != food.end()) {
+    map<Location, Food>::iterator cur_it = j++;
+    const Square &s = grid(cur_it->first);
     if(s.visibility && !s.isFood)
       food.erase(cur_it);
   }
@@ -130,32 +117,22 @@ void State::updateStateEstimate()
 void State::updateDistanceInformation()
 {
   // compute pathfinding info for food, hills, etc
-  bfs(vector<Location>(food.begin(), food.end()),
-      Square::DIST_FOOD);
-  bfs(enemyAnts, Square::DIST_ENEMY_ANTS);
-  bfs(myHills, Square::DIST_OUR_HILL);
-  bfs(vector<Location>(enemyHills.begin(), enemyHills.end()),
-      Square::DIST_ENEMY_HILL);
+  vector<Location> seed;
 
-  // compute pathfinding info for frontier by starting with all invisible
-  // squares
-  vector<Location> frontier;
-  for(int r=0;r<rows;r++) {
-    for(int c=0;c<cols;c++) {
-      if(!grid(r,c).isExplored && !grid(r,c).isWater) {
-        frontier.push_back(Location(r,c));
-      }
-    }
-  }
-  bfs(frontier, Square::DIST_FRONTIER);
+  map<Location, Food>::iterator j = food.begin();
+  for(;j != food.end(); ++j)
+    seed.push_back(j->second.pos_);
+  bfs(seed, myAntsDist);
 }
 
-void State::bfs(vector<Location> seed, int type)
+void State::bfs(vector<Location> seed, Grid<int> &distance) const
 {
+  distance.Init(rows, cols, INT_MAX);
+
   // first, clear the grid of our given type
   for(int r=0;r<rows;r++) {
     for(int c=0;c<cols;c++) {
-      grid(r,c).distance[type] = INT_MAX;
+      distance(r,c) = INT_MAX;
     }
   }
   int dist = 0;
@@ -163,12 +140,12 @@ void State::bfs(vector<Location> seed, int type)
   while(!seed.empty()) {
     for(size_t i=0;i<seed.size();i++) {
       Location l = seed[i];
-      if(grid(l).distance[type] != INT_MAX) continue;
-      grid(l).distance[type] = dist;
+      if(distance(l) != INT_MAX) continue;
+      distance(l) = dist;
       for(int d=0;d<4;d++) {
         Location next = l.next(d);
         if(grid(next).isWater) continue;
-        if(grid(next).distance[type] != INT_MAX) continue;
+        if(distance(next) != INT_MAX) continue;
         queue.push_back(next);
       }
     }
@@ -322,17 +299,25 @@ istream& operator>>(istream &is, State &state)
       else if(inputType == "f") //food square
       {
         is >> row >> col;
-        state.grid(row,col).isFood = 1;
-        state.food.insert(Location(row, col));
+        Location l(row,col);
+        state.grid(l).isFood = 1;
+        state.food.insert(make_pair(l, Food(l)));
       }
       else if(inputType == "a") //live ant square
       {
         is >> row >> col >> player;
-        state.grid(row,col).ant = player;
-        if(player == 0)
-          state.myAnts.push_back(Location(row, col));
-        else
-          state.enemyAnts.push_back(Location(row, col));
+        Location l(row,col);
+        Square &sq = state.grid(l);
+        sq.ant = player;
+        if(player == 0) {
+          int id = state.myAnts.size();
+          sq.myAnts.push_back(id);
+          state.myAnts.push_back(Ant(id, l));
+        } else {
+          int id = state.enemyAnts.size();
+          sq.enemyAnts.push_back(id);
+          state.enemyAnts.push_back(Ant(id, l));
+        }
       }
       else if(inputType == "d") //dead ant square
       {
@@ -345,7 +330,7 @@ istream& operator>>(istream &is, State &state)
         state.grid(row,col).isHill = 1;
         state.grid(row,col).hillPlayer = player;
         if(player == 0)
-          state.myHills.push_back(Location(row, col));
+          state.myHills.insert(Location(row, col));
         else
           state.enemyHills.insert(Location(row, col));
 

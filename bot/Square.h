@@ -10,24 +10,16 @@ struct Square
        isHill:1,
        isFood:1,
        isExplored:1;
-  int ant, hillPlayer;
+  std::vector<int> myAnts, enemyAnts;
+  int ant;
+  int hillPlayer;
   int lastSeen;   // turn# that this square was last observed by an ant
   int visibility; // number of ants who can see this square
-  enum {
-    DIST_FOOD = 0,
-    DIST_FRONTIER = 1,
-    DIST_INVISIBLE = 2,
-    DIST_OUR_HILL = 3,
-    DIST_ENEMY_ANTS = 4,
-    DIST_ENEMY_HILL = 5,
-    NUM_DISTANCES = 6
-  };
-  int distance[NUM_DISTANCES];
-  //std::vector<int> deadAnts; // we don't really need to track these do we?
 
   Square()
   {
     isExplored = isWater = isHill = isFood = 0;
+    lastSeen = 0;
     visibility = 0;
     ant = hillPlayer = -1;
   }
