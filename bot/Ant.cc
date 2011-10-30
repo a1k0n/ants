@@ -11,14 +11,20 @@ bool Ant::Move(State &s, int move)
   Square &newsq = s.grid(newpos);
   if(newsq.isWater) return false;
 
+  // penalize standing on a hill
+  if(oldsq.isHill) s.evalScore ++;
+  if(newsq.isHill) s.evalScore --;
+
   oldsq.myAnts.erase(std::remove(oldsq.myAnts.begin(), oldsq.myAnts.end(), id_),
                      oldsq.myAnts.end());
 
   // TODO: resolve battles with enemy ants with this ant removed
 
+  // FIXME: score colliding ants, etc
   if(oldsq.myAnts.size() == 1) {
     // un-kill the ant on this square
     s.myAnts[oldsq.myAnts[0]].dead_ = false;
+  } else {
   }
 
   // update the distance grid and evaluation scores
@@ -30,8 +36,10 @@ bool Ant::Move(State &s, int move)
   if(newsq.myAnts.size() != 1) {
     // mark all colliding ants dead
     for(size_t i=0;i<newsq.myAnts.size();i++) {
-      s.myAnts[newsq.myAnts[i]].dead_ = false;
+      s.myAnts[newsq.myAnts[i]].dead_ = true;
     }
+  } else {
+    s.myAnts[id_].dead_ = false;
   }
 
   // TODO: resolve battles with enemy ants with this ant added (maybe just by
