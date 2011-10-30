@@ -92,8 +92,10 @@ void State::updateAntVisibility(Ant &a)
 void State::updateVisionInformation()
 {
   evalScore = 0;
-  for(int a=0; a<(int) myAnts.size(); a++)
+  for(int a=0; a<(int) myAnts.size(); a++) {
     updateAntVisibility(myAnts[a]);
+    evalScore += AntScore(*this, myAnts[a]);
+  }
 }
 
 // requires updated visibility information

@@ -1,11 +1,14 @@
 #include "Ant.h"
 #include "State.h"
+#include "Score.h"
 
 bool Ant::Move(State &s, int move)
 {
   if(move == move_)
     return true;
   Square &oldsq = s.grid(pos_);
+
+  s.evalScore -= AntScore(s, *this);
 
   Location newpos = pos_.prev(move_).next(move);
   Square &newsq = s.grid(newpos);
@@ -44,6 +47,8 @@ bool Ant::Move(State &s, int move)
 
   // TODO: resolve battles with enemy ants with this ant added (maybe just by
   // updating the battle strength grid and then doing a final check during eval)
+
+  s.evalScore += AntScore(s, *this);
 
   return true;
 }
