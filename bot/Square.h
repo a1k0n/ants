@@ -1,6 +1,8 @@
 #ifndef SQUARE_H_
 #define SQUARE_H_
 
+#include "Location.h"
+
 #include <vector>
 
 // struct for representing a square in the grid.
@@ -15,6 +17,9 @@ struct Square
   int hillPlayer;
   int lastSeen;   // turn# that this square was last observed by an ant
   int visibility; // number of ants who can see this square
+  
+  Location myNearestAnt;
+  int myAntDist;
 
   Square()
   {

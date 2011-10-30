@@ -30,6 +30,8 @@ struct State
   std::vector<double> scores;
   bool gameover;
 
+  double evalScore;
+
   std::vector<std::pair<Location, int> > visibilityAdjust[TDIRECTIONS];
   std::vector<std::pair<Location, int> > attackAdjust[TDIRECTIONS];
 
@@ -39,8 +41,6 @@ struct State
   std::map<Location, Food> food;
 
   int nMyAntsKilled, nEnemyAntsKilled;
-
-  Grid<int> myAntsDist;
 
   Timer timer;
 
@@ -65,9 +65,11 @@ struct State
   void updateStateEstimate();
   void updateDistanceInformation();
 
-  void bfs(std::vector<Location> seed, Grid<int> &distance) const;
-
+  // sort of a reverse-and-forward-dijkstra step
+  void updateAntPos(const Location &oldpos, const Location &newpos);
+  void dumpDistances();
  private:
+  void bfs(std::vector<std::pair<Location, Location> > seed);
   void updateAntVisibility(Ant &a);
   void computeCircleDelta(const Location &delta,
       std::vector<std::pair<Location, int> > *adjust);

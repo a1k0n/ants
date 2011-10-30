@@ -20,6 +20,10 @@ bool Ant::Move(State &s, int move)
     // un-kill the ant on this square
     s.myAnts[oldsq.myAnts[0]].dead_ = false;
   }
+
+  // update the distance grid and evaluation scores
+  s.updateAntPos(pos_, newpos);
+
   pos_ = newpos;
   move_ = move;
   newsq.myAnts.push_back(id_);

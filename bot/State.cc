@@ -1,5 +1,8 @@
+#include "Score.h"
 #include "State.h"
+
 #include <limits.h>
+#include <queue>
 
 using namespace std;
 
@@ -88,6 +91,7 @@ void State::updateAntVisibility(Ant &a)
 
 void State::updateVisionInformation()
 {
+  evalScore = 0;
   for(int a=0; a<(int) myAnts.size(); a++)
     updateAntVisibility(myAnts[a]);
 }
@@ -117,41 +121,122 @@ void State::updateStateEstimate()
 void State::updateDistanceInformation()
 {
   // compute pathfinding info for food, hills, etc
-  vector<Location> seed;
-
-  map<Location, Food>::iterator j = food.begin();
-  for(;j != food.end(); ++j)
-    seed.push_back(j->second.pos_);
-  bfs(seed, myAntsDist);
+  vector<pair<Location, Location> > seed;
+  for(int i = 0; i < myAnts.size(); ++i)
+    seed.push_back(make_pair(myAnts[i].pos_, myAnts[i].pos_));
+  bfs(seed);
 }
 
-void State::bfs(vector<Location> seed, Grid<int> &distance) const
+// do full BFS path from all (FIXME) ants (or whatever else)
+// and update exploration score as necessary
+void State::bfs(vector<pair<Location, Location> > seed)
 {
-  distance.Init(rows, cols, INT_MAX);
-
   // first, clear the grid of our given type
   for(int r=0;r<rows;r++) {
     for(int c=0;c<cols;c++) {
-      distance(r,c) = INT_MAX;
+      grid(r,c).myAntDist = INT_MAX;
     }
   }
   int dist = 0;
-  vector<Location> queue;
+  vector<pair<Location, Location> > queue;
   while(!seed.empty()) {
     for(size_t i=0;i<seed.size();i++) {
-      Location l = seed[i];
-      if(distance(l) != INT_MAX) continue;
-      distance(l) = dist;
+      const Location &l = seed[i].first;
+      const Location &source = seed[i].second;
+      Square &sq = grid(l);
+      if(sq.myAntDist != INT_MAX) continue;
+      sq.myAntDist = dist;
+      sq.myNearestAnt = source;
+      evalScore += SquareScore(*this, sq);
       for(int d=0;d<4;d++) {
         Location next = l.next(d);
         if(grid(next).isWater) continue;
-        if(distance(next) != INT_MAX) continue;
-        queue.push_back(next);
+        if(grid(next).myAntDist != INT_MAX) continue;
+        queue.push_back(make_pair(next, source));
       }
     }
     seed = queue;
     queue.clear();
     dist++;
+  }
+}
+
+void State::dumpDistances()
+{
+  for(int r=0;r<rows;r++) {
+    for(int c=0;c<cols;c++) {
+      int dist = grid(r,c).myAntDist;
+      if(dist == INT_MAX)
+        cerr << " ";
+      else
+        cerr << min(9, grid(r,c).myAntDist);
+    }
+    cerr << endl;
+  }
+}
+
+struct DijkstraCompare
+{
+  bool operator()(const pair<int, Location> &a,
+                  const pair<int, Location> &b) {
+    return b.first < a.first;
+  }
+};
+
+void State::updateAntPos(const Location &oldpos, const Location &newpos)
+{
+  if(oldpos == newpos)
+    return;
+  // so, first we have to go through and eradicate everything adjacent to the
+  // old position such that the distance is strictly increasing, and at the
+  // boundary, add squares to the priority queue
+  int dist = 0; // we'll use the same conventions as above here
+  priority_queue<pair<int, Location>, vector<pair<int, Location> >,
+    DijkstraCompare> dqueue;
+  vector<Location> seed, queue;
+  seed.push_back(oldpos);
+  while(!seed.empty()) {
+    for(size_t i=0;i<seed.size();i++) {
+      const Location &l = seed[i];
+      Square &sq = grid(l);
+      if(sq.myAntDist == INT_MAX) continue;
+      if(sq.myAntDist == dist) {
+        for(int d=0;d<4;d++) {
+          Location next = l.next(d);
+          if(grid(next).isWater) continue;
+          if(grid(next).myAntDist == INT_MAX) continue;
+          queue.push_back(next);
+        }
+      } else {
+        dqueue.push(make_pair(grid(l).myAntDist, l));
+      }
+      evalScore -= SquareScore(*this, sq);
+      sq.myAntDist = INT_MAX;
+    }
+    seed = queue;
+    queue.clear();
+    dist++;
+  }
+
+  // add in our new ant's position
+  dqueue.push(make_pair(0, newpos));
+  // okay, now we have a priority queue full of our boundary and our new ant's
+  // position, so we just run dijkstra's
+  while(!dqueue.empty()) {
+    int dist = dqueue.top().first;
+    Location l = dqueue.top().second;
+    dqueue.pop();
+    Square &sq = grid(l);
+    if(sq.myAntDist != INT_MAX)
+      continue;
+    sq.myAntDist = dist;
+    evalScore += SquareScore(*this, sq);
+    for(int d=0;d<4;d++) {
+      Location next = l.next(d);
+      if(grid(next).isWater) continue;
+      if(grid(next).myAntDist != INT_MAX) continue;
+      dqueue.push(make_pair(dist+1, next));
+    }
   }
 }
 

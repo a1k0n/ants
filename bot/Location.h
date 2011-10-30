@@ -33,6 +33,10 @@ struct Location
   }
 };
 
+static bool operator==(const Location &a, const Location &b) {
+  return a.row == b.row && a.col == b.col;
+}
+
 static bool operator<(const Location &a, const Location &b) {
   return a.row == b.row ? a.col < b.col : a.row < b.row;
 }
