@@ -18,8 +18,12 @@ struct Square
   int lastSeen;   // turn# that this square was last observed by an ant
   int visibility; // number of ants who can see this square
   
-  Location myNearestAnt;
-  int myAntDist;
+  enum {
+    DIST_MY_ANTS = 0,
+    DIST_ENEMY_HILLS,
+    NUM_DISTANCES
+  };
+  int distance[NUM_DISTANCES];
 
   Square()
   {

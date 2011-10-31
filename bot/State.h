@@ -67,9 +67,9 @@ struct State
 
   // sort of a reverse-and-forward-dijkstra step
   void updateAntPos(const Location &oldpos, const Location &newpos);
-  void dumpDistances();
+  void dumpDistances(int type);
  private:
-  void bfs(std::vector<std::pair<Location, Location> > seed);
+  void bfs(std::vector<Location> seed, int type);
   void updateAntVisibility(Ant &a);
   void computeCircleDelta(const Location &delta,
       std::vector<std::pair<Location, int> > *adjust);

@@ -3,6 +3,7 @@
 
 #include <limits.h>
 #include <math.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -25,6 +26,10 @@ void Bot::playGame()
     state.updateVisionInformation();
     state.updateStateEstimate();
     state.updateDistanceInformation();
+    // FIXME: this is a disaster
+    for(int a=0; a<(int) state.myAnts.size(); a++) {
+      state.evalScore += AntScore(state, state.myAnts[a]);
+    }
     makeMoves();
     endTurn();
   }
@@ -35,11 +40,18 @@ void Bot::playGame()
 // second pass: compute differentials for all ants, and find dependencies
 // between ants to avoid recomputing differentials after each candidate ant move
 
+double coinflip(double prob)
+{
+  return drand48() < prob;
+}
+
 // MAYBE TODO: use log(score) instead?
 double Bot::iterateAnt(double bestscore, Ant &a)
 {
-  cerr << "moving ant @"<<a.pos_.col<<", "<<a.pos_.row<<endl;
+  Location orig_pos = a.pos_;
+  fprintf(stderr, "moving ant @%d,%d\n", orig_pos.col, orig_pos.row);
   int bestmove = -1;
+  int nequal = 1;
   for(int m=0;m<TDIRECTIONS;m++) {
     if(!a.Move(state, m))
       continue;
@@ -48,22 +60,29 @@ double Bot::iterateAnt(double bestscore, Ant &a)
     if(score > bestscore) {
       bestscore = score;
       bestmove = m;
+      nequal = 1;
+    } else if(score == bestscore) {
+      nequal++;
+      if(coinflip(1.0/nequal))
+        bestmove = m;
     }
   }
-  cerr << "using move "<<bestmove<<" for ant @"<<a.pos_.col<<", "<<a.pos_.row<<endl;
   a.Move(state, bestmove);
+  fprintf(stderr, "using move %d for ant @%d,%d (score should be %g, is now %g)\n",
+          bestmove, orig_pos.col, orig_pos.row, bestscore, state.evalScore);
+  bestscore = state.evalScore;
   return bestscore;
 }
 
 //makes the bots moves for the turn
 void Bot::makeMoves()
 {
-  cerr << "turn " << state.turn << ":" << endl;
+  fprintf(stderr, "turn %d:\n", state.turn);
   cerr << state << endl;
 
   double score = state.evalScore;
 
-  state.dumpDistances();
+  state.dumpDistances(Square::DIST_MY_ANTS);
 
   cerr << "eval_init = " << score << endl;
   for(size_t i=0;i<state.myAnts.size();i++) {

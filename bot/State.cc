@@ -94,7 +94,6 @@ void State::updateVisionInformation()
   evalScore = 0;
   for(int a=0; a<(int) myAnts.size(); a++) {
     updateAntVisibility(myAnts[a]);
-    evalScore += AntScore(*this, myAnts[a]);
   }
 }
 
@@ -123,38 +122,42 @@ void State::updateStateEstimate()
 void State::updateDistanceInformation()
 {
   // compute pathfinding info for food, hills, etc
-  vector<pair<Location, Location> > seed;
+  vector<Location> seed;
   for(int i = 0; i < myAnts.size(); ++i)
-    seed.push_back(make_pair(myAnts[i].pos_, myAnts[i].pos_));
-  bfs(seed);
+    seed.push_back(myAnts[i].pos_);
+  bfs(seed, Square::DIST_MY_ANTS);
+
+  seed.clear();
+  for(set<Location>::iterator i = enemyHills.begin();
+      i != enemyHills.end(); ++i)
+    seed.push_back(*i);
+  bfs(seed, Square::DIST_ENEMY_HILLS);
 }
 
 // do full BFS path from all (FIXME) ants (or whatever else)
 // and update exploration score as necessary
-void State::bfs(vector<pair<Location, Location> > seed)
+void State::bfs(vector<Location> seed, int type)
 {
   // first, clear the grid of our given type
   for(int r=0;r<rows;r++) {
     for(int c=0;c<cols;c++) {
-      grid(r,c).myAntDist = INT_MAX;
+      grid(r,c).distance[type] = INT_MAX;
     }
   }
   int dist = 0;
-  vector<pair<Location, Location> > queue;
+  vector<Location> queue;
   while(!seed.empty()) {
     for(size_t i=0;i<seed.size();i++) {
-      const Location &l = seed[i].first;
-      const Location &source = seed[i].second;
+      const Location &l = seed[i];
       Square &sq = grid(l);
-      if(sq.myAntDist != INT_MAX) continue;
-      sq.myAntDist = dist;
-      sq.myNearestAnt = source;
+      if(sq.distance[type] != INT_MAX) continue;
+      sq.distance[type] = dist;
       evalScore += SquareScore(*this, sq);
       for(int d=0;d<4;d++) {
         Location next = l.next(d);
         if(grid(next).isWater) continue;
-        if(grid(next).myAntDist != INT_MAX) continue;
-        queue.push_back(make_pair(next, source));
+        if(grid(next).distance[type] != INT_MAX) continue;
+        queue.push_back(next);
       }
     }
     seed = queue;
@@ -163,15 +166,15 @@ void State::bfs(vector<pair<Location, Location> > seed)
   }
 }
 
-void State::dumpDistances()
+void State::dumpDistances(int type)
 {
   for(int r=0;r<rows;r++) {
     for(int c=0;c<cols;c++) {
-      int dist = grid(r,c).myAntDist;
+      int dist = grid(r,c).distance[type];
       if(dist == INT_MAX)
         cerr << " ";
       else
-        cerr << min(9, grid(r,c).myAntDist);
+        cerr << min(9, grid(r,c).distance[type]);
     }
     cerr << endl;
   }
@@ -181,7 +184,8 @@ struct DijkstraCompare
 {
   bool operator()(const pair<int, Location> &a,
                   const pair<int, Location> &b) {
-    return b.first < a.first;
+    return a.first == b.first ? a.second < b.second :
+      b.first < a.first;
   }
 };
 
@@ -201,19 +205,19 @@ void State::updateAntPos(const Location &oldpos, const Location &newpos)
     for(size_t i=0;i<seed.size();i++) {
       const Location &l = seed[i];
       Square &sq = grid(l);
-      if(sq.myAntDist == INT_MAX) continue;
-      if(sq.myAntDist == dist) {
+      if(sq.distance[Square::DIST_MY_ANTS] == INT_MAX) continue;
+      if(sq.distance[Square::DIST_MY_ANTS] == dist) {
         for(int d=0;d<4;d++) {
           Location next = l.next(d);
           if(grid(next).isWater) continue;
-          if(grid(next).myAntDist == INT_MAX) continue;
+          if(grid(next).distance[Square::DIST_MY_ANTS] == INT_MAX) continue;
           queue.push_back(next);
         }
       } else {
-        dqueue.push(make_pair(grid(l).myAntDist, l));
+        dqueue.push(make_pair(grid(l).distance[Square::DIST_MY_ANTS], l));
       }
       evalScore -= SquareScore(*this, sq);
-      sq.myAntDist = INT_MAX;
+      sq.distance[Square::DIST_MY_ANTS] = INT_MAX;
     }
     seed = queue;
     queue.clear();
@@ -229,25 +233,27 @@ void State::updateAntPos(const Location &oldpos, const Location &newpos)
     Location l = dqueue.top().second;
     dqueue.pop();
     Square &sq = grid(l);
-    if(sq.myAntDist != INT_MAX)
+    if(sq.distance[Square::DIST_MY_ANTS] != INT_MAX)
       continue;
-    sq.myAntDist = dist;
+    sq.distance[Square::DIST_MY_ANTS] = dist;
     evalScore += SquareScore(*this, sq);
     for(int d=0;d<4;d++) {
       Location next = l.next(d);
       if(grid(next).isWater) continue;
-      if(grid(next).myAntDist != INT_MAX) continue;
+      if(grid(next).distance[Square::DIST_MY_ANTS] != INT_MAX) continue;
       dqueue.push(make_pair(dist+1, next));
     }
   }
+  fprintf(stderr, "updated ant pos %d,%d -> %d,%d (score=%g)\n",
+          oldpos.col, oldpos.row,
+          newpos.col, newpos.row,
+          evalScore);
 }
 
 /*
    This is the output function for a state. It will add a char map
    representation of the state to the output stream passed to it.
-
-   For example, you might call "cout << state << endl;"
-   */
+ */
 ostream& operator<<(ostream &os, const State &state)
 {
   for(int row=0; row<state.rows; row++)

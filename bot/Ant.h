@@ -10,11 +10,12 @@ struct Ant
   // the original position, use pos_.prev(move_).
   int id_;
   Location pos_;
-  bool dead_;
   int move_;
 
-  Ant() { move_ = -1; dead_ = false; }
-  Ant(int id, Location pos):id_(id), pos_(pos) { move_ = -1; dead_ = false; }
+  Ant() { Init(); }
+  Ant(int id, Location pos):id_(id), pos_(pos) { Init(); }
+
+  void Init() { move_ = -1; }
 
   bool Move(State &s, int move);
   void CommitMove(State &s);

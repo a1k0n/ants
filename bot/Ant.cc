@@ -8,47 +8,40 @@ bool Ant::Move(State &s, int move)
     return true;
   Square &oldsq = s.grid(pos_);
 
-  s.evalScore -= AntScore(s, *this);
-
   Location newpos = pos_.prev(move_).next(move);
   Square &newsq = s.grid(newpos);
   if(newsq.isWater) return false;
 
+  double antscore = AntScore(s, *this);
+  s.evalScore -= antscore;
+  fprintf(stderr, "Ant::Move: evalScore -AntScore %g\n", antscore);
+
   // penalize standing on a hill
-  if(oldsq.isHill) s.evalScore ++;
-  if(newsq.isHill) s.evalScore --;
+  if(oldsq.isHill && oldsq.hillPlayer == 0) s.evalScore += 10;
+  if(newsq.isHill && newsq.hillPlayer == 0) s.evalScore -= 10;
 
   oldsq.myAnts.erase(std::remove(oldsq.myAnts.begin(), oldsq.myAnts.end(), id_),
                      oldsq.myAnts.end());
 
   // TODO: resolve battles with enemy ants with this ant removed
 
-  // FIXME: score colliding ants, etc
-  if(oldsq.myAnts.size() == 1) {
-    // un-kill the ant on this square
-    s.myAnts[oldsq.myAnts[0]].dead_ = false;
-  } else {
-  }
-
+  double oldeval = s.evalScore;
   // update the distance grid and evaluation scores
   s.updateAntPos(pos_, newpos);
+  fprintf(stderr, "Ant::Move: evalScore updateAntPos(%d,%d->%d,%d) %+g\n",
+          pos_.col, pos_.row, newpos.col, newpos.row,
+          s.evalScore-oldeval);
 
   pos_ = newpos;
   move_ = move;
   newsq.myAnts.push_back(id_);
-  if(newsq.myAnts.size() != 1) {
-    // mark all colliding ants dead
-    for(size_t i=0;i<newsq.myAnts.size();i++) {
-      s.myAnts[newsq.myAnts[i]].dead_ = true;
-    }
-  } else {
-    s.myAnts[id_].dead_ = false;
-  }
 
   // TODO: resolve battles with enemy ants with this ant added (maybe just by
   // updating the battle strength grid and then doing a final check during eval)
 
-  s.evalScore += AntScore(s, *this);
+  antscore = AntScore(s, *this);
+  s.evalScore += antscore;
+  fprintf(stderr, "Ant::Move: evalScore +AntScore %g\n", antscore);
 
   return true;
 }
