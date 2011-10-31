@@ -244,10 +244,12 @@ void State::updateAntPos(const Location &oldpos, const Location &newpos)
       dqueue.push(make_pair(dist+1, next));
     }
   }
+#ifdef VERBOSE
   fprintf(stderr, "updated ant pos %d,%d -> %d,%d (score=%g)\n",
           oldpos.col, oldpos.row,
           newpos.col, newpos.row,
           evalScore);
+#endif
 }
 
 /*

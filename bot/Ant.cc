@@ -16,7 +16,9 @@ bool Ant::Move(State &s, int move)
 
   double antscore = AntScore(s, *this);
   s.evalScore -= antscore;
+#ifdef VERBOSE
   fprintf(stderr, "Ant::Move: evalScore -AntScore %g\n", antscore);
+#endif
 
   // penalize standing on a hill
   if(oldsq.isHill && oldsq.hillPlayer == 0) s.evalScore += 10;
@@ -30,9 +32,11 @@ bool Ant::Move(State &s, int move)
   double oldeval = s.evalScore;
   // update the distance grid and evaluation scores
   s.updateAntPos(pos_, newpos);
+#ifdef VERBOSE
   fprintf(stderr, "Ant::Move: evalScore updateAntPos(%d,%d->%d,%d) %+g\n",
           pos_.col, pos_.row, newpos.col, newpos.row,
           s.evalScore-oldeval);
+#endif
 
   pos_ = newpos;
   move_ = move;
@@ -43,7 +47,9 @@ bool Ant::Move(State &s, int move)
 
   antscore = AntScore(s, *this);
   s.evalScore += antscore;
+#ifdef VERBOSE
   fprintf(stderr, "Ant::Move: evalScore +AntScore %g\n", antscore);
+#endif
 
   return true;
 }

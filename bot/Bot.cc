@@ -49,14 +49,18 @@ double coinflip(double prob)
 double Bot::iterateAnt(double bestscore, Ant &a)
 {
   Location orig_pos = a.pos_;
+#ifdef VERBOSE
   fprintf(stderr, "moving ant @%d,%d\n", orig_pos.col, orig_pos.row);
+#endif
   int bestmove = -1;
   int nequal = 1;
   for(int m=0;m<TDIRECTIONS;m++) {
     if(!a.Move(state, m))
       continue;
     double score = state.evalScore;
+#ifdef VERBOSE
     cerr << "move("<<m<<") score="<<score<<endl;
+#endif
     if(score > bestscore) {
       bestscore = score;
       bestmove = m;
@@ -68,8 +72,10 @@ double Bot::iterateAnt(double bestscore, Ant &a)
     }
   }
   a.Move(state, bestmove);
+#ifdef VERBOSE
   fprintf(stderr, "using move %d for ant @%d,%d (score should be %g, is now %g)\n",
           bestmove, orig_pos.col, orig_pos.row, bestscore, state.evalScore);
+#endif
   bestscore = state.evalScore;
   return bestscore;
 }
@@ -82,19 +88,19 @@ void Bot::makeMoves()
 
   double score = state.evalScore;
 
+#ifdef VERBOSE
   state.dumpDistances(Square::DIST_MY_ANTS);
+#endif
 
-  cerr << "eval_init = " << score << endl;
   for(size_t i=0;i<state.myAnts.size();i++) {
     score = iterateAnt(score, state.myAnts[i]);
-    cerr << "eval(" << i << ") = " << score << endl;
   }
 
   for(size_t i=0;i<state.myAnts.size();i++) {
     state.myAnts[i].CommitMove(state);
   }
 
-  cerr << "time taken: " << state.timer.getTime() << "ms" << endl << endl;
+  cerr << "time taken: " << state.timer.getTime() << "ms; score=" << state.evalScore << endl << endl;
 }
 
 //finishes the turn
