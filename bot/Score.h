@@ -20,6 +20,12 @@ static double ExploreScore(const State &state, const Square &sq) {
 }
 
 static double FoodScore(const State &state, const Square &sq) {
+  // FIXME: if an ant goes between three pieces of food, such that going
+  // towards one moves away from two others (usually one of them has to be
+  // equidistant) then the ant will get stuck with this metric.  we need a way
+  // out, possibly based on the time-since-observed of the food making older
+  // food more urgent, or something, to break the tie and to make sitting still
+  // near food always bad.
   return pow(kDiscount, sq.distance[Square::DIST_MY_ANTS] - 1);
 }
 
