@@ -5,6 +5,7 @@
 #include "State.h"
 
 #include <assert.h>
+#include <limits.h>
 
 // future-reward discount factor (usually gamma in reinforcement learning
 // literature)
