@@ -2,6 +2,8 @@
 #include "State.h"
 #include "Score.h"
 
+#include <algorithm>
+
 bool Ant::Move(State &s, int move)
 {
   if(move == move_)
