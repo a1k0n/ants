@@ -3,17 +3,21 @@
 
 #include "Location.h"
 
+#include <set>
+
 struct State;
 struct Ant
 {
   // pos_ is the current position of the ant (implied after the move) -- to get
   // the original position, use pos_.prev(move_).
-  int id_;
+  int team_;
   Location pos_;
   int move_;
+  int nEnemies_;
+  std::set<Ant*> enemies_;
 
   Ant() { Init(); }
-  Ant(int id, Location pos):id_(id), pos_(pos) { Init(); }
+  Ant(int team, Location pos):team_(team), pos_(pos) { Init(); }
 
   void Init() { move_ = -1; }
 

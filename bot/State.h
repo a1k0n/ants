@@ -26,7 +26,7 @@ struct State
   // various squared radii
   double attackradius2, spawnradius2, viewradius2;
   double loadtime, turntime;
-  int viewBoxSize;
+  int viewBoxSize, attackBoxSize;
   std::vector<double> scores;
   bool gameover;
 
@@ -36,7 +36,7 @@ struct State
   std::vector<std::pair<Location, int> > attackAdjust[TDIRECTIONS];
 
   Grid<Square> grid;
-  std::vector<Ant> myAnts, enemyAnts;
+  std::vector<Ant*> myAnts, enemyAnts;
   std::set<Location> myHills, enemyHills;
   std::map<Location, Food> food;
 
@@ -70,9 +70,10 @@ struct State
   void dumpDistances(int type);
  private:
   void bfs(std::vector<Location> seed, int type);
-  void updateAntVisibility(Ant &a);
+  void updateAntVisibility(Ant *a);
   void computeCircleDelta(const Location &delta,
-      std::vector<std::pair<Location, int> > *adjust);
+      std::vector<std::pair<Location, int> > *adjust,
+      int viewBoxSize, int viewradius2);
 };
 
 std::ostream& operator<<(std::ostream &os, const State &state);

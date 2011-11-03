@@ -58,7 +58,9 @@ double State::distance2(const Location &loc1, const Location &loc2)
 // Generate a vector of relative locations where visibility increases and
 // decreases
 void State::computeCircleDelta(const Location &delta,
-                               vector<pair<Location, int> > *adjust)
+                               vector<pair<Location, int> > *adjust,
+                               int viewBoxSize,
+                               int viewradius2)
 {
   for(int y = -viewBoxSize-1; y <= viewBoxSize+1; y++) {
     for(int x = -viewBoxSize-1; x <= viewBoxSize+1; x++) {
@@ -72,18 +74,35 @@ void State::computeCircleDelta(const Location &delta,
   }
 }
 
-void State::updateAntVisibility(Ant &a)
+void State::updateAntVisibility(Ant *a)
 {
-  const Location &l = a.pos_;
+  const Location &l = a->pos_;
   int x0 = wrapCol(l.col - viewBoxSize),
       y0 = wrapRow(l.row - viewBoxSize);
   int r, c, dx, dy;
+  // update visibility information
   for(c = x0, dx = -viewBoxSize; dx <= viewBoxSize; dx++, c = c == cols-1 ? 0:c+1) {
     for(r = y0, dy = -viewBoxSize; dy <= viewBoxSize; dy++, r = r == rows-1 ? 0:r+1) {
       if(dx*dx + dy*dy <= viewradius2) {
         grid(r,c).visibility ++;
         grid(r,c).isExplored = true;
         grid(r,c).lastSeen = turn;
+      }
+    }
+  }
+
+  // update attack information
+  for(c = x0, dx = -attackBoxSize; dx <= attackBoxSize; dx++, c = c == cols-1 ? 0:c+1) {
+    for(r = y0, dy = -attackBoxSize; dy <= attackBoxSize; dy++, r = r == rows-1 ? 0:r+1) {
+      if(dx == 0 && dy == 0)
+        continue;
+      if(dx*dx + dy*dy <= attackradius2) {
+        Square &sq = grid(r,c);
+        if(!sq.ant)
+          continue;
+
+        a->enemies_.insert(sq.ant);
+        sq.ant->enemies_.insert(a);
       }
     }
   }
@@ -124,7 +143,7 @@ void State::updateDistanceInformation()
   // compute pathfinding info for food, hills, etc
   vector<Location> seed;
   for(int i = 0; i < myAnts.size(); ++i)
-    seed.push_back(myAnts[i].pos_);
+    seed.push_back(myAnts[i]->pos_);
   bfs(seed, Square::DIST_MY_ANTS);
 
   seed.clear();
@@ -269,8 +288,8 @@ ostream& operator<<(ostream &os, const State &state)
         os << '*';
       else if(s.isHill)
         os << (char)('A' + s.hillPlayer);
-      else if(s.ant >= 0)
-        os << (char)('a' + s.ant);
+      else if(s.ant)
+        os << (char)('a' + s.ant->team_);
       else if(s.visibility)
         os << '.';
       else if(s.isExplored)
@@ -306,7 +325,9 @@ void State::setViewRadius(int radius2)
   for(int i=0;i<TDIRECTIONS;i++) {
     visibilityAdjust[i].clear();
     computeCircleDelta(Location(DIRECTIONS[i][0], DIRECTIONS[i][1]),
-                       &visibilityAdjust[i]);
+                       &visibilityAdjust[i], viewBoxSize, viewradius2);
+    computeCircleDelta(Location(DIRECTIONS[i][0], DIRECTIONS[i][1]),
+                       &attackAdjust[i], attackBoxSize, attackradius2);
     fprintf(stderr, "direction %c: adjust ", CDIRECTIONS[i]);
     for(int j=0;j<visibilityAdjust[i].size();j++) {
       const pair<Location, int> &adj = visibilityAdjust[i][j];
@@ -403,15 +424,12 @@ istream& operator>>(istream &is, State &state)
         is >> row >> col >> player;
         Location l(row,col);
         Square &sq = state.grid(l);
-        sq.ant = player;
+        sq.ant = new Ant(player, l);
+        sq.nextAnt = sq.ant;
         if(player == 0) {
-          int id = state.myAnts.size();
-          sq.myAnts.push_back(id);
-          state.myAnts.push_back(Ant(id, l));
+          state.myAnts.push_back(sq.ant);
         } else {
-          int id = state.enemyAnts.size();
-          sq.enemyAnts.push_back(id);
-          state.enemyAnts.push_back(Ant(id, l));
+          state.enemyAnts.push_back(sq.ant);
         }
       }
       else if(inputType == "d") //dead ant square

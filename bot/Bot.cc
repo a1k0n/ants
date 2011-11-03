@@ -46,16 +46,16 @@ double coinflip(double prob)
 }
 
 // MAYBE TODO: use log(score) instead?
-double Bot::iterateAnt(double bestscore, Ant &a)
+double Bot::iterateAnt(double bestscore, Ant *a)
 {
-  Location orig_pos = a.pos_;
+  Location orig_pos = a->pos_;
 #ifdef VERBOSE
   fprintf(stderr, "moving ant @%d,%d\n", orig_pos.col, orig_pos.row);
 #endif
-  int bestmove = -1;
+  int bestmove = a->move_;
   int nequal = 1;
   for(int m=0;m<TDIRECTIONS;m++) {
-    if(!a.Move(state, m))
+    if(!a->Move(state, m))
       continue;
     double score = state.evalScore;
 #ifdef VERBOSE
@@ -71,7 +71,7 @@ double Bot::iterateAnt(double bestscore, Ant &a)
         bestmove = m;
     }
   }
-  a.Move(state, bestmove);
+  a->Move(state, bestmove);
 #ifdef VERBOSE
   fprintf(stderr, "using move %d for ant @%d,%d (score should be %g, is now %g)\n",
           bestmove, orig_pos.col, orig_pos.row, bestscore, state.evalScore);
@@ -95,9 +95,15 @@ void Bot::makeMoves()
   for(size_t i=0;i<state.myAnts.size();i++) {
     score = iterateAnt(score, state.myAnts[i]);
   }
+#if 1
+  // now re-evaluate in backwards order
+  for(int i=(int)state.myAnts.size()-2;i>=0;i--) {
+    score = iterateAnt(score, state.myAnts[i]);
+  }
+#endif
 
   for(size_t i=0;i<state.myAnts.size();i++) {
-    state.myAnts[i].CommitMove(state);
+    state.myAnts[i]->CommitMove(state);
   }
 
   cerr << "time taken: " << state.timer.getTime() << "ms; score=" << state.evalScore << endl << endl;

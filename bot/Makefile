@@ -16,7 +16,7 @@ $(EXECUTABLE): $(OBJECTS)
 .cc.o: *.h
 	$(CC) $(CFLAGS) $< -o $@
 
-clean: 
+clean:
 	-rm -f ${EXECUTABLE} ${OBJECTS} *.d
 	-rm -f debug.txt
 
@@ -35,4 +35,4 @@ Ant.o: Ant.h Location.h State.h Food.h Grid.h Square.h Timer.h Score.h
 Bot.o: Bot.h State.h Ant.h Location.h Food.h Grid.h Square.h Timer.h Score.h
 Grid.o: Grid.h Location.h
 MyBot.o: Bot.h State.h Ant.h Location.h Food.h Grid.h Square.h Timer.h
-State.o: Score.h Square.h Location.h State.h Ant.h Food.h Grid.h Timer.h
+State.o: Score.h Square.h Ant.h Location.h State.h Food.h Grid.h Timer.h

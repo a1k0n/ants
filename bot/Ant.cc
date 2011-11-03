@@ -3,6 +3,7 @@
 #include "Score.h"
 
 #include <algorithm>
+#include <assert.h>
 
 bool Ant::Move(State &s, int move)
 {
@@ -13,8 +14,10 @@ bool Ant::Move(State &s, int move)
   Location newpos = pos_.prev(move_).next(move);
   Square &newsq = s.grid(newpos);
   if(newsq.isWater) return false;
+  if(newsq.nextAnt) return false;
+  assert(oldsq.nextAnt == this);
 
-  double antscore = AntScore(s, *this);
+  double antscore = AntScore(s, this);
   s.evalScore -= antscore;
 #ifdef VERBOSE
   fprintf(stderr, "Ant::Move: evalScore -AntScore %g\n", antscore);
@@ -23,9 +26,6 @@ bool Ant::Move(State &s, int move)
   // penalize standing on a hill
   if(oldsq.isHill && oldsq.hillPlayer == 0) s.evalScore += 10;
   if(newsq.isHill && newsq.hillPlayer == 0) s.evalScore -= 10;
-
-  oldsq.myAnts.erase(std::remove(oldsq.myAnts.begin(), oldsq.myAnts.end(), id_),
-                     oldsq.myAnts.end());
 
   // TODO: resolve battles with enemy ants with this ant removed
 
@@ -38,14 +38,15 @@ bool Ant::Move(State &s, int move)
           s.evalScore-oldeval);
 #endif
 
+  oldsq.nextAnt = NULL;
+  newsq.nextAnt = this;
   pos_ = newpos;
   move_ = move;
-  newsq.myAnts.push_back(id_);
 
   // TODO: resolve battles with enemy ants with this ant added (maybe just by
   // updating the battle strength grid and then doing a final check during eval)
 
-  antscore = AntScore(s, *this);
+  antscore = AntScore(s, this);
   s.evalScore += antscore;
 #ifdef VERBOSE
   fprintf(stderr, "Ant::Move: evalScore +AntScore %g\n", antscore);
