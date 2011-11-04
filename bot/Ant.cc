@@ -60,5 +60,3 @@ void Ant::CommitMove(State &s)
   if(move_ != -1)
     s.CommitMove(pos_.prev(move_), move_);
 }
-
-

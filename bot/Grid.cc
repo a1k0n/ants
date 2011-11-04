@@ -22,5 +22,3 @@ ostream& operator<<(ostream& out, const Grid<int> &grid)
     out << endl;
   }
 }
-
-
