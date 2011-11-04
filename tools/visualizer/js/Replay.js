@@ -6,7 +6,7 @@
 /**
  * Constructs a new direction from the given coordinates. X points to the right and Y points to the
  * bottom. Up is 0°, Right is 90° and so on.
- * 
+ *
  * @class A compass direction
  * @constructor
  * @param {Number}
@@ -119,7 +119,7 @@ DataType = {
  * loaded by the Java wrapper. In the visualizer, ants are unique objects, that are mostly a list of
  * animation key-frames that are interpolated for any given time to produce a "tick-less" animation.<br>
  * <b>Called by the Java streaming visualizer.</b>
- * 
+ *
  * @class The replay class loads a replay or map in string form and prepares it for playback. All
  *        per turn data is lazily evaluated to avoid long load times. The Java wrapper has some
  *        extensions to load streaming replays. Make sure changes here don't break it.
@@ -505,7 +505,7 @@ function Replay(replay, debug, swapUser) {
 
 /**
  * Adds optional meta data to the replay as required. This includes default player names and colors.
- * 
+ *
  * @private
  * @param {Number}
  *        swapIndex The index of a player who's default color should be exchanged with the first
@@ -548,7 +548,7 @@ Replay.prototype.addMissingMetaData = function(swapIndex) {
                 var ci = cl.indexOf(this.meta['challenge_rank'][i]);
                 color = PLAYER_COLORS[COLOR_MAP[ci]];
                 cl[ci] = null;
-                
+
             } else {
                 color = PLAYER_COLORS[COLOR_MAP[i]];
             }
@@ -579,7 +579,7 @@ Replay.prototype.addMissingMetaData = function(swapIndex) {
 /**
  * Converts a line old based replay file or a map into a JavaScript object. This method is used to
  * prepare the data for further parsing. The old formats are first converted to the new format.
- * 
+ *
  * @private
  * @param {String}
  *        replay The map or ancient replay file.
@@ -732,7 +732,7 @@ Replay.prototype.txtToJson = function(replay) {
  * <li>The result is cached.</li>
  * <li>Turns are calculated iteratively so there is no quick random access to turn 1000.</li>
  * </ul>
- * 
+ *
  * @param {Number}
  *        n The requested turn.
  * @returns {Ant[]} The array of visible ants.
@@ -847,7 +847,7 @@ Replay.prototype.getTurn = function(n) {
 /**
  * Spawns a new food item that may eventually be turned into an ant at any time.<br>
  * <b>Called by the Java streaming visualizer.</b>
- * 
+ *
  * @param {Number}
  *        id Global ant id, an auto-incrementing number for each new ant. See {@link Config#label}
  * @param {Number}
@@ -884,7 +884,7 @@ Replay.prototype.spawnFood = function(id, row, col, spawn, owner) {
 
 /**
  * Spawns a new ant.
- * 
+ *
  * @param {Number}
  *        id Global ant id, an auto-incrementing number for each new ant. See {@link Config#label}
  * @param {Number}
@@ -924,7 +924,7 @@ Replay.prototype.spawnAnt = function(id, row, col, spawn, owner) {
 /**
  * Animates food conversion to a player ant.<br>
  * <b>Called by the Java streaming visualizer.</b>
- * 
+ *
  * @private
  * @param {Ant}
  *        aniAnt The ant to be worked on.
@@ -952,7 +952,7 @@ Replay.prototype.convertAnt = function(aniAnt, instantly, turn, owner) {
 /**
  * Animates an ant's death.<br>
  * <b>Called by the Java streaming visualizer.</b>
- * 
+ *
  * @private
  * @param {Ant}
  *        aniAnt The ant to be worked on.
@@ -986,7 +986,7 @@ Replay.prototype.killAnt = function(aniAnt, death) {
  * data about dying ants they cannot be animated in the usual way. Instead they are displayed as
  * darker, smaller squares for the duration of a turn.<br>
  * <b>Called by the Java streaming visualizer.</b>
- * 
+ *
  * @param {Ant}
  *        aniAnt The ant to be worked on.
  * @param {Number}
@@ -1013,7 +1013,7 @@ Replay.prototype.deadAnt = function(aniAnt, dead) {
  * <li>Unlike the turn data, fog of war is not computed iteratively. So it does not depend on the
  * previous turn's fog data, but also doesn't use the optimization opportunity there.</li>
  * </ul>
- * 
+ *
  * @param {Number}
  *        player The index of the player.
  * @param {Number}
@@ -1087,7 +1087,7 @@ Replay.prototype.getFog = function(player, turn) {
  * </ol>
  * Inside the same type the items are intuitively ordered by row and col, both ascending. The
  * original owner id may also be considered for multiple dead ants on the same square.
- * 
+ *
  * @param {Number}
  *        player The index of the participating player.
  * @param {Number}
@@ -1298,7 +1298,7 @@ LineIterator.NORMALIZE_REGEXP = /^([^\S\n]*(#.*)?\n)*|(\n[^\S\n]*(#.*)?)*$|\n[^\
 
 /**
  * Fetches the next line from the replay.
- * 
+ *
  * @throws {Error}
  *         If an attempt is made to read past the last line.
  * @returns {String} The next non-empty, non-comment line.
@@ -1312,7 +1312,7 @@ LineIterator.prototype.gimmeNext = function() {
 
 /**
  * Checks for the end of file condition.
- * 
+ *
  * @returns {Boolean} True, if the end of the replay string has been reached.
  */
 LineIterator.prototype.moar = function() {
@@ -1322,7 +1322,7 @@ LineIterator.prototype.moar = function() {
 /**
  * Splits a line of text into keyword and parameter block. Since the parameter block is allowed to
  * be a single string with spaces no further splitting is done.
- * 
+ *
  * @class A single line of replay / map text in the general format "keyword param1 param2 ...". The
  *        class offers methods to apply external splitting functions to it. And validate values.
  * @constructor
@@ -1343,7 +1343,7 @@ TokenLine.KEYWORD_REGEXP = /(\S+)\s*(.*)/;
 
 /**
  * Enforces that this TokenLine starts with the expected keyword.
- * 
+ *
  * @param {String}
  *        keyword The expected keyword.
  * @throws {Error}
@@ -1361,7 +1361,7 @@ TokenLine.prototype.kw = function(keyword) {
  * Splits the parameter block of this object using given parsing-and-validation functions. Most of
  * those functions will split after the first white-space. Some will check for positive integers or
  * other constraints.
- * 
+ *
  * @param {Array}
  *        args A list of parsing-and-validation functions.
  * @param {Number}
@@ -1392,7 +1392,7 @@ TokenLine.prototype.as = function(args, optional) {
 /**
  * Helper function to construct an Error object with a message about keywords / parameters in the
  * replay / map that did not match a certain expectation.
- * 
+ *
  * @private
  * @throws {Error}
  *         Always.
@@ -1410,7 +1410,7 @@ TokenLine.prototype.expected = function(expectation, reality) {
  * <h4>Example</h4>
  * "v ants 1" is a constant line in the replay. expectEq(0, 'ants') verifies that the first
  * parameter is the string 'ants' and expectEq(1, 1) validates the number 1 following it.
- * 
+ *
  * @throws {Error}
  *         If value !== params[idx]
  * @param {Number}
@@ -1429,7 +1429,7 @@ TokenLine.prototype.expectEq = function(idx, value) {
  * <h4>Example</h4>
  * "v ants 1" is a constant line in the replay. expectEq(0, 'ants') verifies that the first
  * parameter is the string 'ants' and expectEq(1, 1) validates the number 1 following it.
- * 
+ *
  * @throws {Error}
  *         If value &lt; params[idx]
  * @param {Number}

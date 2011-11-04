@@ -37,14 +37,14 @@ public enum Ilk {
 
 	private static final Map<Integer, Ilk> idLookup = new HashMap<Integer, Ilk>();
 	private static final Map<Character, Ilk> symbolLookup = new HashMap<Character, Ilk>();
-	
+
 	static {
 		for (Ilk i : EnumSet.allOf(Ilk.class)) {
 			idLookup.put(i.id, i);
 			symbolLookup.put(i.symbol, i);
 		}
 	}
-	
+
 	public final int id;
 	public final char symbol;
 
@@ -56,27 +56,27 @@ public enum Ilk {
 	public boolean isAnt() {
 		return this.id >= MY_ANT.id;
 	}
-	
+
 	public boolean isEnemy() {
 		return this.id > MY_ANT.id;
 	}
-	
+
 	public boolean isPassable() {
 		return this.id > WATER.id;
 	}
-	
+
 	public boolean isUnoccupied() {
 		return this.id == LAND.id || this.id == DEAD.id;
 	}
-	
+
 	public boolean isEnemyOf(Ilk ant) {
 		return this.id >= MY_ANT.id && this.id != ant.id;
 	}
-	
+
 	public static Ilk fromId(int id) {
 		return idLookup.get(id);
 	}
-	
+
 	public static Ilk fromSymbol(char symbol) {
 		return symbolLookup.get(symbol);
 	}

@@ -19,7 +19,7 @@ var $import_base;
 
 /**
  * Imports a file in Java package notation.
- * 
+ *
  * @param {String}
  *        file the 'package' name
  */

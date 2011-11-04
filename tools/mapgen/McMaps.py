@@ -33,21 +33,21 @@ class Node:
         if self.right_child != None:
             for location in self.right_child.all():
                 yield location
- 
+
 def kdtree(point_list, depth=0):
     if not point_list:
         return
- 
+
     # Select axis based on depth so that axis cycles through all valid values
     k = len(point_list[0]) # assumes all points have the same dimension
     axis = depth % k
     def key_func(point):
         return point[axis]
- 
+
     # Sort point list and choose median as pivot element
     point_list.sort(key=key_func)
     median = len(point_list) // 2 # choose median
- 
+
     # Create node and construct subtrees
     node = Node()
     node.location = [point_list[median], depth]
@@ -94,7 +94,7 @@ class Triangle:
                 (x1, y1), (x2, y2), (x3, y3) = self.p1, self.p2, self.p3
                 ma = (y2-y1)/(x2-x1)
                 mb = (y3-y2)/(x3-x2)
-                if ma != mb:                    
+                if ma != mb:
                     x = (ma*mb*(y1-y3) +
                          mb*(x1+x2) -
                          ma*(x2+x3))/(2*(mb-ma))
@@ -105,7 +105,7 @@ class Triangle:
 def divide_conquer():
     class Delaunay:
         pass
-    
+
     def form(points):
         if len(points) > 3:
             mid = len(points)//2
@@ -117,13 +117,13 @@ def divide_conquer():
             return
     def merge(left, right):
         pass
-    
+
     width = 100.0
     height = 100.0
-    
+
     points = [Point(random()*width, random()*height) for i in range(10)]
-    points.sort()    
-    
+    points.sort()
+
     # draw image
     size = (int(width), int(height))
     image = Image.new('RGB', size, (128,128,128))
@@ -143,14 +143,14 @@ def delaunay():
                 (x1, y1), (x2, y2), (x3, y3) = self.points
                 ma = (y2-y1)/(x2-x1)
                 mb = (y3-y2)/(x3-x2)
-                if ma != mb:                    
+                if ma != mb:
                     x = (ma*mb*(y1-y3) +
                          mb*(x1+x2) -
                          ma*(x2+x3))/(2*(mb-ma))
                     y = -1/ma*(x-(x1+x2)/2) + (y1+y2)/2
                     self._center = (x, y)
                 # check for coincident lines
-                # check for 
+                # check for
             return self._center
     # setup
     width = 100.0
@@ -160,11 +160,11 @@ def delaunay():
     triangles = []
     triangles.append(Triangle([(0.0,0.0),(0.0, height), (width, 0.0)]))
     triangles.append(Triangle([(0.0, height), (width, 0.0), (width, height)]))
-    
+
     # add point, remove inside triangles, create new ones
     point = (random()*width, random()*height)
-    
-    
+
+
     # draw triangles
     size = (int(width), int(height))
     image = Image.new('RGB', size, BARRIER_COLOR)
@@ -237,7 +237,7 @@ def voronoi(players=4):
         image = ImageChops.offset(image, -offset[0], -offset[1])
     image = image.resize((width*4, height*4))
     image.save('voronoi.png')
-    
+
 def random_box():
     players = 4
     width = randrange(16, 64) * 2
@@ -355,7 +355,7 @@ vert_mirror = (vert_point, (mirror,), vert_increase)
 vert_rotate = (both_point, (mirror, flip), vert_increase)
 horz_copy = (horz_point, (copy,), horz_increase)
 horz_mirror = (horz_point, (mirror,), horz_increase)
-horz_rotate = (both_point, (flip, mirror), horz_increase)    
+horz_rotate = (both_point, (flip, mirror), horz_increase)
 
 def extend(funcs, points, size, count=2):
     if type(points) == list:
@@ -367,19 +367,19 @@ def extend(funcs, points, size, count=2):
         for c in range(1,count):
             new_points[funcs[0](point, funcs[2](size, c), funcs[1])] = id
     return new_points, funcs[2](size, count)
-               
+
 def make_symmetric(points, size, players):
     # TODO: shearing, like antimatroid
     #    3, 4 and 7 player can be made fair
     # TODO: rotational
     #    2, 4 and 8 can be made fairish
-    
+
     # pick random grid size
     divs = [i for i in range(1,players+1) if players%i==0]
     row_sym = choice(divs)
     col_sym = players/row_sym
     grid = (row_sym, col_sym)
-    
+
     newsize = (size[0]*row_sym, size[1]*col_sym)
     newpoints = []
     comps = []
@@ -395,7 +395,7 @@ def make_symmetric(points, size, players):
         col_sym /= 2
     if col_sym > 1:
         points, size = extend(horz_copy, points, size, col_sym)
-    
+
     return points, size, grid
 
 def random_points(count, size, spacing, distance):
@@ -446,16 +446,16 @@ def cells(size, points, min_gap=5, max_braids=1000, openness=0.25, distance=eucl
     rows, cols = size
     size = (rows, cols)
     m = [[LAND for col in range(cols)] for row in range(rows)]
-    
+
     # ensure points is a dict with id's
     if type(points) == dict:
         points = {point: x for x, point in enumerate(points)}
-        
+
     # undirected node graph
-    neighbor = defaultdict(list) 
+    neighbor = defaultdict(list)
     # list of barriers to remove when carving a passage between nodes
     barrier = defaultdict(list)
-    
+
     for row in range(rows):
         for col in range(cols):
             # TODO: improve speed with nearest neighbor queries
@@ -463,7 +463,7 @@ def cells(size, points, min_gap=5, max_braids=1000, openness=0.25, distance=eucl
             cutoff = min(distances.values()) + 1
             closest = [point for point, d in distances.items() if d <= cutoff]
             comps = set([points[point] for point in closest])
-            
+
             # find if there are unique complement sets that are closest
             # if not, this is probably a mirrored edge and the points should be
             # considered one cell
@@ -499,18 +499,18 @@ def cells(size, points, min_gap=5, max_braids=1000, openness=0.25, distance=eucl
                     col_distance(col, points[nearest][1], cols) >= cols//2):
                     m[row][col] = BARRIER # this barrier can't be carved
                 #m[row][col] = distances.index(closest[0])
-    
+
     # add starting positions
     #for i, (row, col) in enumerate(points):
     #    m[row][col] = i
-    
+
     # remove small gaps
     for path in barrier.keys():
         if len(path) == 2:
             if len(barrier[path]) < min_gap:
                 neighbor[path[0]].remove(path[1])
                 neighbor[path[1]].remove(path[0])
-                
+
     # carve passages function to pass to maze function
     def carve(path):
         #print('%s-%s (%s,%s)-(%s,%s) %s,%s' % (chr(path[0]+97), chr(path[1]+97),
@@ -524,8 +524,8 @@ def cells(size, points, min_gap=5, max_braids=1000, openness=0.25, distance=eucl
             path = tuple(sorted(path))
             for row, col in barrier[path]:
                 m[row][col] = LAND
-                
-            
+
+
     carved = growing_tree(neighbor, carve, max_braids=max_braids, openness=openness)
     #for c1, cs in carved.items():
     #    for c2 in cs:
@@ -547,10 +547,10 @@ def growing_tree(nodes, carve, max_braids=1000, openness=0.5):
     while len(cells) > 0:
         # tune this for different generation methods
         # recursive backtracker
-        #index = -1                     
+        #index = -1
         # Prim's algorithm
-        index = randrange(len(cells)) 
-        
+        index = randrange(len(cells))
+
         cell = cells[index]
         unvisited = [node for node in nodes[cell] if not node in visited]
         if len(unvisited) > 0:
@@ -568,7 +568,7 @@ def growing_tree(nodes, carve, max_braids=1000, openness=0.5):
                 #braid = choice([n for n in nodes[cell] if not n in carved[cell]])
                 # longest loop
                 braid = ([c for c in cells if c in nodes[cell]]+nodes[cell])[0]
-                
+
                 carve((cell, braid))
                 carved[cell].append(braid)
                 max_braids -= 1
@@ -580,12 +580,12 @@ def cell_maze():
     # these control how much barrier carving will happen
     max_braids = 100 # points where the maze can create a loop
     openness = 0.01  # chance that non dead ends can create a loop
-    
+
     size = (100,100)
     point_count = 100
     spacing= 5
     points = random_points(point_count, size, spacing, euclidean_distance)
-    
+
 def ant_map(m):
     tmp = 'rows %s\ncols %s\n' % (len(m), len(m[0]))
     players = {}
@@ -683,8 +683,6 @@ if __name__ == '__main__':
     p, s, g = make_symmetric(p, s, randrange(2,12))
     t = make_text(p, s)
     print("size: %s\ngrid: %s\n\n%s" % (s, g, t))
-    
+
     #import cProfile
     #cProfile.run('main()')
-    
-    

@@ -24,7 +24,7 @@ function CanvasElement() {
 
 /**
  * Sets the size of this canvas and invalidates it, if an actual change is detected.
- * 
+ *
  * @param {Number}
  *        width the new width
  * @param {Number}
@@ -46,7 +46,7 @@ CanvasElement.prototype.setSize = function(width, height) {
 /**
  * Checks if a coordinate pair is within the canvas area. The canvas' x and y properties are used as
  * it's offset.
- * 
+ *
  * @param {Number}
  *        x the x coordinate in question
  * @param {Number}
@@ -59,7 +59,7 @@ CanvasElement.prototype.contains = function(x, y) {
 
 /**
  * Ensures that the contents of the canvas are up to date. A redraw is triggered if necessary.
- * 
+ *
  * @returns {Boolean} true, if the canvas had to be redrawn
  */
 CanvasElement.prototype.validate = function() {
@@ -81,7 +81,7 @@ CanvasElement.prototype.validate = function() {
  * Causes a comparison of the relevant values that make up the visible content of this canvas
  * between the visualizer and cached values. If the cached values are out of date the canvas is
  * marked as invalid.
- * 
+ *
  * @returns {Boolean} true, if the internal state has changed
  */
 CanvasElement.prototype.checkState = function() {
@@ -92,7 +92,7 @@ CanvasElement.prototype.checkState = function() {
  * Makes another canvas a dependency of this one. This will cause this canvas to be invalidated if
  * the dependency becomes invalid and will cause this canvas to validate the dependency before
  * attempting to validate itself. Do not create cyclic dependencies!
- * 
+ *
  * @param {CanvasElement}
  *        element the dependency
  */
@@ -106,7 +106,7 @@ CanvasElement.prototype.dependsOn = function(element) {
  * it wrap around and come in again on the other side, this method can be called with a given
  * function that contains the drawing commands. The wrapping will be simulated by repeatedly calling
  * the function and using matrix translations on the drawing context in between.
- * 
+ *
  * @param {Number}
  *        x the left coordinate
  * @param {Number}
@@ -162,7 +162,7 @@ CanvasElementAbstractMap.extend(CanvasElement);
 
 /**
  * Draws a red marker on the map. Used when coordinates are given in the replay URL.
- * 
+ *
  * @param {Number}
  *        xs the x pixel position
  * @param {Number}
@@ -236,7 +236,7 @@ CanvasElementMiniMap.extend(CanvasElementAbstractMap);
  * Causes a comparison of the relevant values that make up the visible content of this canvas
  * between the visualizer and cached values. If the cached values are out of date the canvas is
  * marked as invalid.
- * 
+ *
  * @returns {Boolean} true, if the internal state has changed
  */
 CanvasElementMiniMap.prototype.checkState = function() {
@@ -294,7 +294,7 @@ CanvasElementMap.extend(CanvasElementAbstractMap);
  * Causes a comparison of the relevant values that make up the visible content of this canvas
  * between the visualizer and cached values. If the cached values are out of date the canvas is
  * marked as invalid.
- * 
+ *
  * @returns {Boolean} true, if the internal state has changed
  */
 CanvasElementMap.prototype.checkState = function() {
@@ -323,7 +323,7 @@ CanvasElementFogPattern.extend(CanvasElement);
  * Causes a comparison of the relevant values that make up the visible content of this canvas
  * between the visualizer and cached values. If the cached values are out of date the canvas is
  * marked as invalid.
- * 
+ *
  * @returns {Boolean} true, if the internal state has changed
  */
 CanvasElementFogPattern.prototype.checkState = function() {
@@ -371,7 +371,7 @@ CanvasElementFog.extend(CanvasElement);
  * Causes a comparison of the relevant values that make up the visible content of this canvas
  * between the visualizer and cached values. If the cached values are out of date the canvas is
  * marked as invalid.
- * 
+ *
  * @returns {Boolean} true, if the internal state has changed
  */
 CanvasElementFog.prototype.checkState = function() {
@@ -479,7 +479,7 @@ CanvasElementAntsMap.extend(CanvasElement);
  * Causes a comparison of the relevant values that make up the visible content of this canvas
  * between the visualizer and cached values. If the cached values are out of date the canvas is
  * marked as invalid.
- * 
+ *
  * @returns {Boolean} true, if the internal state has changed
  */
 CanvasElementAntsMap.prototype.checkState = function() {
@@ -573,7 +573,7 @@ CanvasElementAntsMap.prototype.checkState = function() {
 /**
  * Builds the internal list of ants and food that need a circle drawn around them because the mouse
  * cursor is within their radius of effect (either attack or spawn).
- * 
+ *
  * @returns {Boolean} true, if the internal list has changed since the last call of this method
  */
 CanvasElementAntsMap.prototype.collectAntsAroundCursor = function() {
@@ -861,7 +861,7 @@ CanvasElementAntsMap.prototype.draw = function() {
 
 /**
  * Sets the ant hill image to use when drawing the map.
- * 
+ *
  * @param {HTMLCanvasElement}
  *        hillImage a colorized hill graphic.
  */
@@ -893,7 +893,7 @@ CanvasElementShiftedMap.extend(CanvasElement);
  * Causes a comparison of the relevant values that make up the visible content of this canvas
  * between the visualizer and cached values. If the cached values are out of date the canvas is
  * marked as invalid.
- * 
+ *
  * @returns {Boolean} true, if the internal state has changed
  */
 CanvasElementShiftedMap.prototype.checkState = function() {
@@ -993,7 +993,7 @@ CanvasElementGraph.extend(CanvasElement);
 /**
  * Tries to replace the given player's status at the end of the match with a Unicode glyph. This is
  * basically to reduce the noise caused by the longer textual descriptions.
- * 
+ *
  * @private
  * @param {Number}
  *        i the zero based player index
@@ -1014,7 +1014,7 @@ CanvasElementGraph.prototype.statusToGlyph = function(i) {
  * Causes a comparison of the relevant values that make up the visible content of this canvas
  * between the visualizer and cached values. If the cached values are out of date the canvas is
  * marked as invalid.
- * 
+ *
  * @returns {Boolean} true, if the internal state has changed
  */
 CanvasElementGraph.prototype.checkState = function() {
@@ -1128,7 +1128,7 @@ CanvasElementGraph.prototype.draw = function() {
 /**
  * Helper function that returns a replay property with the given name, that should refer to a
  * statistics array. If the name is 'scores' the replay is also checked for the end game bonus.
- * 
+ *
  * @param {String}
  *        name The property name to be queried.
  * @returns {Stats} the statistics set for the given item name.
@@ -1185,7 +1185,7 @@ CanvasElementStats.MAX_HEIGHT = CanvasElementStats.MIN_HEIGHT + 70;
 /**
  * Sets the size of this CanvasElementStats and the contained {@link CanvasElementGraph} and
  * invalidates both, if an actual change is detected.
- * 
+ *
  * @param {Number}
  *        width the new width
  * @param {Number}
@@ -1204,7 +1204,7 @@ CanvasElementStats.prototype.setSize = function(width, height) {
  * Causes a comparison of the relevant values that make up the visible content of this canvas
  * between the visualizer and cached values. If the cached values are out of date the canvas is
  * marked as invalid.
- * 
+ *
  * @returns {Boolean} true, if the internal state has changed
  */
 CanvasElementStats.prototype.checkState = function() {
@@ -1219,7 +1219,7 @@ CanvasElementStats.prototype.checkState = function() {
 
 /**
  * Daws a bar graph for the current turn and - if enabled - the contained time line.
- * 
+ *
  * @param resized
  *        {Boolean} Indicates weather the canvas has been resized and even static elements of the
  *        display have to be redrawn.
@@ -1275,7 +1275,7 @@ CanvasElementStats.prototype.draw = function(resized) {
 /**
  * Helper function that returns a replay property with the given name, that should refer to a
  * statistics array. If the name is 'scores' the replay is also checked for the end game bonus.
- * 
+ *
  * @param {String}
  *        name The property name to be queried.
  * @param {Number}
@@ -1295,7 +1295,7 @@ CanvasElementStats.prototype.getStats = function(name, turn) {
 
 /**
  * Renders a horizontal 'stacked' bar graph.
- * 
+ *
  * @private
  * @param {Number}
  *        x the left coordinate

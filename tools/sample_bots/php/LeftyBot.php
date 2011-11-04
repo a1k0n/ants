@@ -6,7 +6,7 @@ class LeftyBot
 {
     public $antsLefty = array();
     public $antsStraight = array();
-    
+
     public function doTurn( $ants )
     {
         $destinations = array();

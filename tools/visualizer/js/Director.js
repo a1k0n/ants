@@ -29,7 +29,7 @@ function Director(vis) {
 
 /**
  * Query if the director is currently playing back.
- * 
+ *
  * @returns {Boolean} True, if the current speed is not 0
  */
 Director.prototype.playing = function() {
@@ -79,7 +79,7 @@ Director.prototype.stop = function() {
 
 /**
  * Stops playback and jumps to a specific time. This is usually used to jump to the start of a turn.
- * 
+ *
  * @param {Number}
  *        time The time in question. 0 will jump to the start of 'turn 1'. Out of range values will
  *        be clamped.
@@ -97,7 +97,7 @@ Director.prototype.gotoTick = function(time) {
 /**
  * Starts a slow motion playback (forward or backward) from the current position to a given time at
  * a rate of one turn per second.
- * 
+ *
  * @param {Number}
  *        time The time in question. 0 will jump to the start of 'turn 1'. Out of range values will
  *        be clamped.
@@ -125,7 +125,7 @@ Director.prototype.slowmoTo = function(time) {
  * next call to itself if the playback hasn't met an end condition (like the target time for a
  * slow-mo). The CPU usage limit is obeyed here and if the visualizer is in {@link Config#debug}
  * mode the title bar of the browser is updated with an FPS counter.
- * 
+ *
  * @private
  * @param {Number}
  *        delay This is the delay that was artificially introduced to meet the CPU usage limit given
@@ -284,7 +284,7 @@ Director.prototype.loop = function(delay) {
 
 /**
  * The clean up method for the director resets the loop timeout and calls stop().
- * 
+ *
  * @see Visualizer#cleanUp
  */
 Director.prototype.cleanUp = function() {
@@ -294,7 +294,7 @@ Director.prototype.cleanUp = function() {
 
 /**
  * Causes the visualizer to draw the current game state.
- * 
+ *
  * @param {Boolean}
  *        urgent When the director is currently playing back, the call would be a no-op and the
  *        redraw delayed to the next invocation of loop(). If this is not desired because - for

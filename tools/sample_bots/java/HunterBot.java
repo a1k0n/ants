@@ -40,4 +40,3 @@ public class HunterBot implements Bot {
 		}
 	}
 }
-

@@ -82,4 +82,3 @@ if __name__ == '__main__':
         Ants.run(LeftyBot())
     except KeyboardInterrupt:
         print('ctrl-c, leaving ...')
-        

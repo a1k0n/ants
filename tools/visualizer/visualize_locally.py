@@ -26,7 +26,7 @@ def generate(data, generated_path):
     newline_re = re.compile("\s", re.MULTILINE)
     insert_re = re.compile(r"## REPLAY PLACEHOLDER ##")
     path_re = re.compile(r"## PATH PLACEHOLDER ##")
-    
+
     try:
         json.loads(data)
         data = quote_re.sub(r"\\\\'", data)
@@ -35,8 +35,8 @@ def generate(data, generated_path):
         data = data.replace('\n', '\\\\n')
 
     content = path_re.sub(mod_path, content)
-    content = insert_re.sub(data, content)   
-       
+    content = insert_re.sub(data, content)
+
     output = open(generated_path, 'w')
     output.write(content)
     output.close()
@@ -57,7 +57,7 @@ def launch(filename=None, nolaunch=False, generated_path=None):
 
     # open the page in the browser
     if not nolaunch:
-        webbrowser.open('file://'+os.path.realpath(generated_path))    
+        webbrowser.open('file://'+os.path.realpath(generated_path))
 
 if __name__ == "__main__":
     launch(nolaunch=len(sys.argv) > 1 and sys.argv[1] == '--nolaunch')

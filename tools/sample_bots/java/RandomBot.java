@@ -4,7 +4,7 @@ public class RandomBot implements Bot {
 	public static void main(String[] args) {
 		Ants.run(new RandomBot());
 	}
-	
+
 	public void do_turn(Ants ants) {
 		Set<Tile> destinations = new HashSet<Tile>();
 		for (Tile location : ants.myAnts()) {
@@ -26,4 +26,3 @@ public class RandomBot implements Bot {
 		}
 	}
 }
-

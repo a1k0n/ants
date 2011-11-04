@@ -6,7 +6,7 @@
 
 /**
  * The constructor initializes it with one key frame.
- * 
+ *
  * @class An ant in the visualization. It is used in rendering and created when the replay is parsed
  *        as well as extended with animation key frames as more turns are requested. It has turned
  *        out that pre-calculating all key frames for thousand ants over the course of thousand
@@ -36,7 +36,7 @@ function Ant(id, time) {
  * between two existing frames it will be the result of a linear interpolation of those. If the time
  * is beyond the last key frame, the result is a copy of the last key frame. It is an error to
  * specify a time before the first key frame.
- * 
+ *
  * @param {Number}
  *        time the time in question
  * @returns {KeyFrame} a key frame for the time or null, if the time is before the first key frame
@@ -66,7 +66,7 @@ Ant.prototype.frameAt = function(time) {
  * Interpolates the key frames around the given time and returns the result. If the time exceeds the
  * time stamp of the last key frame, that key frame is returned instead. If the ant doesn't exist
  * yet at that time, null is returned.
- * 
+ *
  * @param {Number}
  *        time the time in question
  * @returns {KeyFrameEx} the interpolated key frame
@@ -116,7 +116,7 @@ Ant.prototype.interpolate = function(time) {
  * Creates an fade over of some attribute given the start time and the end time with a target value.
  * The attribute stays unchanged at the start time. This method is used by the {@link Replay} to
  * create animation effects.
- * 
+ *
  * @param {String}
  *        key attribute name
  * @param {Number}
@@ -149,7 +149,7 @@ Ant.prototype.fade = function(key, valueb, timea, timeb) {
 
 /**
  * The constructor is only called from within methods of {@link Ant} that add key frames.
- * 
+ *
  * @class A single animation key frame of an ant.
  * @constructor
  */
@@ -167,7 +167,7 @@ function KeyFrame() {
 /**
  * Assigns the interpolation of two other key frames at a given time to this key frame. This method
  * is used by {@link Ant}.
- * 
+ *
  * @param {KeyFrame}
  *        a first key frame
  * @param {KeyFrame}
@@ -192,7 +192,7 @@ KeyFrame.prototype.interpolate = function(a, b, time) {
 
 /**
  * Assigns the values of another key frame object to this one.
- * 
+ *
  * @param {KeyFrame}
  *        other the other key frame
  * @returns {KeyFrame} this object
@@ -229,7 +229,7 @@ KeyFrameEx.extend(KeyFrame);
 
 /**
  * Updates the map coordinates.
- * 
+ *
  * @param scale
  *        pixel size of an ant on the map
  * @param mapWidth

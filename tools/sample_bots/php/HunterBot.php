@@ -9,7 +9,7 @@ class HunterBot
         $destinations = array();
         foreach( $ants->myAnts as $ant ) {
             list($aRow, $aCol) = $ant;
-            
+
             $targets = array_merge( $ants->food, $ants->enemyAnts);
             // find closest food or enemy ant
             $closest_target = null;

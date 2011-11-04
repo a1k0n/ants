@@ -178,4 +178,3 @@ if __name__ == '__main__':
     example_map = SymmetricMap()
     example_map.random_walk_map()
     example_map.print_map()
-

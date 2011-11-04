@@ -42,7 +42,7 @@ Config.prototype['cpu'] = 0.5;
 
 /**
  * Loads all keys from a generic object into the configuration.
- * 
+ *
  * @param {Object}
  *        preset the object containing configuration values
  */
@@ -58,7 +58,7 @@ Config.prototype.overrideFrom = function(preset) {
 
 /**
  * Checks if browser "local storage" is available.
- * 
+ *
  * @returns {Boolean} True, if the browser supports local storage.
  */
 Config.prototype.hasLocalStorage = function() {
@@ -71,7 +71,7 @@ Config.prototype.hasLocalStorage = function() {
 
 /**
  * Stores all keys to local storage (if supported).
- * 
+ *
  * @throws {Error}
  *         Throws an error, if something different than a string, number or boolean is stored.
  * @return {Boolean} True, if successful.
@@ -112,7 +112,7 @@ Config.prototype.save = function() {
 
 /**
  * Tries to load configuration values from local storage if available.
- * 
+ *
  * @returns {Boolean} True, if successful.
  */
 Config.prototype.load = function() {

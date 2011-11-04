@@ -7,7 +7,7 @@
  * On a infinite repeating map, this maps a coordinate x into the 'original' instance of the map
  * area. That is the area starting at (0;0) ranging to (width;height). This function operates on a
  * single coordinate so the range parameter can be either the width or height.
- * 
+ *
  * @param {Number}
  *        x The coordinate that should be remapped.
  * @param {Number}
@@ -20,7 +20,7 @@ Math.wrapAround = function(x, range) {
 
 /**
  * A simple clamp function that makes sure, a value x doesn't violate a given range.
- * 
+ *
  * @param {Number}
  *        x The value that should be clamped to the range.
  * @param {Number}
@@ -35,7 +35,7 @@ Math.clamp = function(x, min, max) {
 
 /**
  * Calculate the (squared) distance between two points on a wrapped map.
- * 
+ *
  * @param {Number}
  *        x1
  * @param {Number}
@@ -60,7 +60,7 @@ Math.dist_2 = function(x1, y1, x2, y2, w, h) {
 
 /**
  * A set of browser quirks, that can be queried to take alternate code paths.
- * 
+ *
  * @namespace
  */
 Quirks = {
@@ -73,7 +73,7 @@ Quirks = {
 
 /**
  * Names for common key-codes.
- * 
+ *
  * @namespace
  */
 Key = {
@@ -93,13 +93,13 @@ Key = {
 
 /**
  * Functions that wrap content into HTML tags.
- * 
+ *
  * @namespace
  */
 Html = {
 	/**
 	 * Creates a table HTML element.
-	 * 
+	 *
 	 * @param {Function}
 	 *        content function that returns the content of the table
 	 * @returns {String} the HTML table
@@ -110,7 +110,7 @@ Html = {
 
 	/**
 	 * Creates a table row HTML element.
-	 * 
+	 *
 	 * @param {Function}
 	 *        content function that returns the content of the table
 	 * @returns {String} the HTML table row
@@ -121,7 +121,7 @@ Html = {
 
 	/**
 	 * Creates a table data HTML element.
-	 * 
+	 *
 	 * @param {Function}
 	 *        content function that returns the content of the table
 	 * @returns {String} the HTML table cell
@@ -132,7 +132,7 @@ Html = {
 
 	/**
 	 * Creates a HTML font element with underlined style.
-	 * 
+	 *
 	 * @param {Function}
 	 *        content function that returns the content of the font element
 	 * @returns {String} the HTML font element
@@ -143,7 +143,7 @@ Html = {
 
 	/**
 	 * Creates a HTML font element with bold style.
-	 * 
+	 *
 	 * @param {Function}
 	 *        content function that returns the content of the font element
 	 * @returns {String} the HTML font element
@@ -154,7 +154,7 @@ Html = {
 
 	/**
 	 * Creates a HTML font element with italic style.
-	 * 
+	 *
 	 * @param {Function}
 	 *        content function that returns the content of the font element
 	 * @returns {String} the HTML font element
@@ -165,7 +165,7 @@ Html = {
 
 	/**
 	 * Helper function to create a HTML element from generic info.
-	 * 
+	 *
 	 * @private
 	 * @param {String}
 	 *        element the element name
@@ -184,14 +184,14 @@ Html = {
 
 /**
  * General purpose drawing functions.
- * 
+ *
  * @namespace
  */
 Shape = {
 	/**
 	 * Draws the rounded rectangles used by buttons. Drawing attributes must be set before calling
 	 * this function.
-	 * 
+	 *
 	 * @param {RenderingContext2D}
 	 *        ctx The rendering context to use.
 	 * @param {Number}
@@ -224,7 +224,7 @@ Shape = {
 
 /**
  * This function is called on functors to make their classes sub-classes of another class.
- * 
+ *
  * @param {Function}
  *        clazz The functor to inherit from.
  */
@@ -282,7 +282,7 @@ function Location(x, y, w, h) {
 
 /**
  * Checks if a given coordinate pair is within the area described by this object.
- * 
+ *
  * @param {Number}
  *        x left coordinate
  * @param {Number}
@@ -312,7 +312,7 @@ function Delegate(obj, func, args) {
 
 /**
  * Invokes the method stored in this Delegate.
- * 
+ *
  * @param {Array}
  *        args Optional argument list that overrides any arguments passed in the constructor.
  */
@@ -350,7 +350,7 @@ function hsl_to_rgb (C) {
     var m = l - 0.5 * c;
     return [ Math.floor(0.999 + 255 * (r + m)),
              Math.floor(0.999 + 255 * (g + m)),
-             Math.floor(0.999 + 255 * (b + m)) ]    
+             Math.floor(0.999 + 255 * (b + m)) ]
 };
 
 /**

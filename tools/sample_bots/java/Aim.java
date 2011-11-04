@@ -8,12 +8,12 @@ public enum Aim {
 	EAST (0, 1, 'e'),
 	SOUTH (1, 0, 's'),
 	WEST (0, -1, 'w');
-	
+
 	private static final Map<Aim, Aim> rightLookup = new EnumMap<Aim, Aim>(Aim.class);
 	private static final Map<Aim, Aim> leftLookup = new EnumMap<Aim, Aim>(Aim.class);
 	private static final Map<Aim, Aim> behindLookup = new EnumMap<Aim, Aim>(Aim.class);
 	private static final Map<Character, Aim> symbolLookup = new HashMap<Character, Aim>();
-	
+
 	static {
 		rightLookup.put(NORTH, EAST);
 		rightLookup.put(EAST, SOUTH);
@@ -32,17 +32,17 @@ public enum Aim {
 		symbolLookup.put('s', SOUTH);
 		symbolLookup.put('w', WEST);
 	}
-	
+
 	public final int dCol;
 	public final int dRow;
 	public final char symbol;
-	
+
 	private Aim(int dRow, int dCol, char symbol) {
 		this.dRow = dRow;
 		this.dCol = dCol;
 		this.symbol = symbol;
 	}
-	
+
 	public Aim left() {
 		return leftLookup.get(this);
 	}
@@ -54,7 +54,7 @@ public enum Aim {
 	public Aim behind() {
 		return behindLookup.get(this);
 	}
-	
+
 	public static Aim fromSymbol(char symbol) {
 		return symbolLookup.get(symbol);
 	}

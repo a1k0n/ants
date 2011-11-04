@@ -175,7 +175,7 @@ class Ants(Game):
 
         # the engine may kill players before the game starts and this is needed to prevent errors
         self.orders = [[] for i in range(self.num_players)]
-        
+
         self.probable_rank = None
         self.probably_turn = None
 
@@ -766,7 +766,7 @@ class Ants(Game):
         self.all_ants.append(ant)
         self.current_ants[loc] = ant
         return ant
-    
+
     def kill_ant(self, ant, ignore_error=False):
         """ Kill the ant at the given location
 
@@ -1379,7 +1379,7 @@ class Ants(Game):
         if self.is_rank_stabilized():
             self.cutoff = 'rank stabilized'
             return True
-              
+
         # check if not ending a game earlier makes any difference
         if self.probably_turn is None:
             probable_winner = list(set(list(self.remaining_players())) & set(self.remaining_hills()))
@@ -1387,11 +1387,11 @@ class Ants(Game):
                 probable_score = self.score[:]
                 probable_score[probable_winner[0]] += sum([HILL_POINTS for hill in self.hills.values()
                                                            if hill.killed_by == None
-                                                           and hill.owner != probable_winner[0]])            
+                                                           and hill.owner != probable_winner[0]])
                 # entering extended player period
                 self.probable_rank = [sorted(probable_score, reverse=True).index(x) for x in probable_score]
                 self.probably_turn = self.turn
-            
+
         return False
 
     def kill_player(self, player):
@@ -1421,7 +1421,7 @@ class Ants(Game):
             self.score[players[0]] += self.bonus[players[0]]
 
         self.calc_significant_turns()
-        
+
         # check if a rule change lengthens games needlessly
         if self.cutoff is None:
             self.cutoff = 'turn limit reached'

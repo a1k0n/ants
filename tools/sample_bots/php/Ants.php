@@ -58,7 +58,7 @@ class Ants
         echo("go\n");
         flush();
     }
-    
+
     public function setup($data)
     {
         foreach ( $data as $line) {

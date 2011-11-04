@@ -61,5 +61,5 @@ class HunterBotTest extends PHPUnit_Framework_TestCase
         $this->assertEquals("o 2 2 e\no 4 2 s\n", $output);
     }
 
-    
+
 }

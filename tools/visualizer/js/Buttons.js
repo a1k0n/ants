@@ -165,7 +165,7 @@ ButtonGroup.prototype.draw = function() {
 
 /**
  * Finds an active button under the mouse cursor.
- * 
+ *
  * @param {Number}
  *        mx the mouse x position
  * @param {Number}
@@ -211,7 +211,7 @@ ImageButton.extend(Button);
 
 /**
  * Draws the partial image into the button.
- * 
+ *
  * @private
  * @param {CanvasRenderingContext2D}
  *        ctx the rendering context to use
@@ -225,7 +225,7 @@ ImageButton.prototype.drawInternal = function(ctx) {
 
 /**
  * Calculates and returns the position and size of this button.
- * 
+ *
  * @returns {Location} the location of this button
  */
 ImageButton.prototype.getLocation = function() {
@@ -278,7 +278,7 @@ ImageButtonGroup.VERTICAL = true;
 
 /**
  * Calculates the optimal position for the next added button.
- * 
+ *
  * @private
  * @returns {Number} the optimal position for the next added button
  */
@@ -292,7 +292,7 @@ ImageButtonGroup.prototype.nextDelta = function() {
 
 /**
  * Adds a button to this group according to given parameters.
- * 
+ *
  * @param {Number}
  *        idx selects the partial image to be shown from the group's image
  * @param {Function}
@@ -310,7 +310,7 @@ ImageButtonGroup.prototype.addButton = function(idx, onclick, hint) {
 
 /**
  * Adds a some space in between buttons.
- * 
+ *
  * @param {Number}
  *        size the amount of space in pixels
  */
@@ -324,7 +324,7 @@ ImageButtonGroup.prototype.addSpace = function(size) {
 
 /**
  * Looks up the button that displays a given partial image.
- * 
+ *
  * @param {Number}
  *        idx index into the image atlas of the partial image
  * @returns {ImageButton} the first found button or null if none matches
@@ -363,7 +363,7 @@ TextButton.extend(Button);
 
 /**
  * Draws the label into the button.
- * 
+ *
  * @private
  * @param {CanvasRenderingContext2D}
  *        ctx the rendering context to use
@@ -383,7 +383,7 @@ TextButton.prototype.drawInternal = function(ctx) {
 
 /**
  * Calculates and returns the position and size of this button.
- * 
+ *
  * @returns {Location} the location of this button
  */
 TextButton.prototype.getLocation = function() {
@@ -392,7 +392,7 @@ TextButton.prototype.getLocation = function() {
 
 /**
  * Updates the button text and resizes the button.
- * 
+ *
  * @param {String}
  *        text The new caption.
  */
@@ -427,7 +427,7 @@ TextButtonGroup.extend(ButtonGroup);
 
 /**
  * Adds a button to this group according to given parameters.
- * 
+ *
  * @param {String}
  *        text the label that is displayed on the button
  * @param color
@@ -445,7 +445,7 @@ TextButtonGroup.prototype.addButton = function(text, color, onclick) {
 /**
  * This will layout the buttons according to a given width, much like left aligned text in a word
  * processor.
- * 
+ *
  * @param {Number}
  *        width the maximum line width in pixels
  * @returns {Number} the resulting height of the group after the process
@@ -484,7 +484,7 @@ function ButtonManager(ctx) {
 
 /**
  * Adds a new image button group.
- * 
+ *
  * @param {String}
  *        name a descriptive group name for easy lookup
  * @param {HTMLImageElement}
@@ -508,7 +508,7 @@ ButtonManager.prototype.addImageGroup = function(name, img, layout, mode, border
 
 /**
  * Adds a new text button group.
- * 
+ *
  * @param {String}
  *        name a descriptive group name for easy lookup
  * @param {Number}
@@ -538,7 +538,7 @@ ButtonManager.prototype.draw = function() {
 
 /**
  * Retrieves a button group with a given name from the manager.
- * 
+ *
  * @param {String}
  *        name the name of the group
  * @returns {ButtonGroup} the button group if it exists or undefined
@@ -549,7 +549,7 @@ ButtonManager.prototype.getGroup = function(name) {
 
 /**
  * Finds an active button under the mouse cursor. The call is forwarded to matching button groups.
- * 
+ *
  * @see ButtonGroup#mouseMove
  * @param {Number}
  *        mx the mouse x position

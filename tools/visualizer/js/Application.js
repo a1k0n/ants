@@ -14,19 +14,19 @@
 LoadingState = {
 	/**
 	 * The visualizer is not currently loading a replay or map.
-	 * 
+	 *
 	 * @const
 	 */
 	IDLE : 0,
 	/**
 	 * The visualizer is loading a replay or map and cannot take any load requests.
-	 * 
+	 *
 	 * @const
 	 */
 	LOADING : 1,
 	/**
 	 * The visualizer is currently cleaning up.
-	 * 
+	 *
 	 * @const
 	 * @see Visualizer#cleanUp
 	 */
@@ -203,13 +203,13 @@ Visualizer = function(container, options, w, h, configOverrides) {
 		this.replayReq = undefined;
 		/**
 		 * the main canvas
-		 * 
+		 *
 		 * @private
 		 */
 		this.main = {};
 		/**
 		 * a hint text overlay
-		 * 
+		 *
 		 * @private
 		 */
 		this.hint = '';
@@ -228,7 +228,7 @@ Visualizer = function(container, options, w, h, configOverrides) {
  * until the current thread of execution has finished. To work around that limitation, this method
  * adds the function to be called to the browser's timer queue. Additionally any thrown errors are
  * also printed.
- * 
+ *
  * @private
  * @param {String}
  *        log a message to be logged before executing the function
@@ -272,7 +272,7 @@ Visualizer.prototype.progress = function(log, func, id) {
 
 /**
  * Places a paragraph with a message in the visualizer DOM element.
- * 
+ *
  * @private
  * @param {String}
  *        text the message text
@@ -283,7 +283,7 @@ Visualizer.prototype.logOut = function(text) {
 
 /**
  * Stops loading, cleans up the instance and calls {@link Visualizer#logOut} with the text in red.
- * 
+ *
  * @private
  * @param {string}
  *        text the error message text
@@ -299,7 +299,7 @@ Visualizer.prototype.errorOut = function(text, cleanUp) {
 /**
  * Converts a JavaScript Error into a HTML formatted string representation and prints that on the
  * web page.
- * 
+ *
  * @private
  * @param {Error|String}
  *        error a thrown error or string
@@ -345,7 +345,7 @@ Visualizer.prototype.exceptionOut = function(error, cleanUp) {
 /**
  * Resets the visualizer and associated objects to an initial state. This method is also called in
  * case of an error.
- * 
+ *
  * @private
  */
 Visualizer.prototype.cleanUp = function() {
@@ -374,7 +374,7 @@ Visualizer.prototype.cleanUp = function() {
 /**
  * This is called before a replay or map is loaded to ensure the visualizer is in an idle state at
  * that time. It then sets the state to {@link LoadingState}.LOADING.
- * 
+ *
  * @private
  * @returns {Boolean} true, if the visualizer was idle.
  */
@@ -387,7 +387,7 @@ Visualizer.prototype.preload = function() {
 
 /**
  * Loads a replay or map file located on the same server using a XMLHttpRequest.
- * 
+ *
  * @param {string}
  *        file the relative file name
  */
@@ -422,7 +422,7 @@ Visualizer.prototype.loadReplayDataFromURI = function(file) {
 
 /**
  * Loads a replay string directly.
- * 
+ *
  * @param {string}
  *        data the replay string
  */
@@ -438,7 +438,7 @@ Visualizer.prototype.loadReplayData = function(data) {
  * visualizer is really slow in some situations, it used to be unresponsive when streaming at a high
  * rate. To avoid that it now requests a single new turn from the wrapper for every rendered frame.<br>
  * <b>Called by the Java streaming visualizer.</b>
- * 
+ *
  * @returns {Replay} the replay object is exposed to the Java wrapper
  */
 Visualizer.prototype.streamingInit = function() {
@@ -482,7 +482,7 @@ Visualizer.prototype.streamingStart = function() {
 
 /**
  * Makes the visualizer output video frames at a fixed rate
- * 
+ *
  * @param {Number}
  *        fpt the number of frames per turn
  */
@@ -493,7 +493,7 @@ Visualizer.prototype.javaVideoOutput = function(fpt) {
 /**
  * In this method the replay string that has been passed directly or downloaded is parsed into a
  * {@link Replay}. Afterwards an attempt is made to start the visualization ({@link Visualizer#tryStart}).
- * 
+ *
  * @private
  */
 Visualizer.prototype.loadParseReplay = function() {
@@ -515,7 +515,7 @@ Visualizer.prototype.loadParseReplay = function() {
 /**
  * Creates the main canvas element and insert it into the web page. An attempt is made to start the
  * visualization ({@link Visualizer#tryStart}).
- * 
+ *
  * @private
  */
 Visualizer.prototype.loadCanvas = function() {
@@ -538,7 +538,7 @@ Visualizer.prototype.loadCanvas = function() {
  * Called by the ImageManager when no more images are loading. Since image loading is a background
  * operation, an attempt is made to start the visualization ({@link Visualizer#tryStart}). If some
  * images didn't load, the visualizer is stopped with an error message.
- * 
+ *
  * @param error
  *        {String} Contains the error message for images that didn't load or is empty.
  */
@@ -557,7 +557,7 @@ Visualizer.prototype.completedImages = function(error) {
  * are loaded, some remaining items that depend on them are created and playback is started.
  * tryStart() is called after any long during action that runs in the background, like downloading
  * images and the replay to check if that was the last missing component.
- * 
+ *
  * @private
  */
 Visualizer.prototype.tryStart = function() {
@@ -850,7 +850,7 @@ Visualizer.prototype.centerMap = function() {
 
 /**
  * Changes the replay speed.
- * 
+ *
  * @private
  * @param {Number}
  *        modifier {@link Config#speedFactor} is changed by this amount.
@@ -864,7 +864,7 @@ Visualizer.prototype.modifySpeed = function(modifier) {
  * Calculates the position that the map should be moved to if it is centered. The map is centered
  * once at the start and on a click of the center button. The center is usually (0;0), unless
  * {@link Options#row} and {@link Options#col} are set.
- * 
+ *
  * @private
  * @param scale
  *        {Number} Since the position is in pixels, it depends on the map scale.
@@ -884,7 +884,7 @@ Visualizer.prototype.calculateMapCenter = function(scale) {
 
 /**
  * Adds the game and player link buttons at the top of the display.
- * 
+ *
  * @private
  */
 Visualizer.prototype.addPlayerButtons = function() {
@@ -928,7 +928,7 @@ Visualizer.prototype.addPlayerButtons = function() {
  * This calculates the playback speed from the configuration values {@link Config#duration},
  * {@link Config#speedSlowest}, {@link Config#speedFastest} and {@link Config#speedFactor}. The
  * latter can be controlled by the speed buttons.
- * 
+ *
  * @private
  */
 Visualizer.prototype.calculateReplaySpeed = function() {
@@ -954,7 +954,7 @@ Visualizer.prototype.calculateReplaySpeed = function() {
 /**
  * Calculates the visualizer display size depending on the constructor arguments and whether
  * fullscreen mode is supported and enabled.
- * 
+ *
  * @private
  * @returns {Size} the size the visualizer should have
  */
@@ -971,7 +971,7 @@ Visualizer.prototype.calculateCanvasSize = function() {
  * Enables or disables fullscreen mode. In fullscreen mode the &lt;body&gt; element is replaced with
  * a new one that contains only the visualizer. For the Java/Rhino version a special setFullscreen()
  * method on the window object is called.
- * 
+ *
  * @private
  * @param enable
  *        {Boolean} If true, the visualizer will switch to fullscreen mode if supported.
@@ -1013,7 +1013,7 @@ Visualizer.prototype.setFullscreen = function(enable) {
  * </ul>
  * This value is then multiplied by the zoom given to this function and ultimately clamped to a
  * range of [1..20].
- * 
+ *
  * @private
  * @param zoom
  *        {Number} The new zoom level in pixels. Map squares will be scaled to this value. It will
@@ -1056,7 +1056,7 @@ Visualizer.prototype.setZoom = function(zoom) {
 
 /**
  * Sets the ant label display mode to a new value.
- * 
+ *
  * @private
  * @param mode
  *        {Number} 0 = no display, 1 = letters, 2 = global ant ids
@@ -1075,7 +1075,7 @@ Visualizer.prototype.setAntLabels = function(mode) {
 
 /**
  * Updates the captions of player link buttons.
- * 
+ *
  * @private
  */
 Visualizer.prototype.updatePlayerButtonText = function() {
@@ -1095,7 +1095,7 @@ Visualizer.prototype.updatePlayerButtonText = function() {
 
 /**
  * Called upon window size changes to layout the visualizer elements.
- * 
+ *
  * @private
  * @param forced
  *        {Boolean} If true, the layouting and redrawing is performed even if no size change can be
@@ -1181,7 +1181,7 @@ Visualizer.prototype.resize = function(forced) {
 
 /**
  * Enables or disables fog of war display.
- * 
+ *
  * @private
  * @param idx
  *        {Number} The index of the player for which fog is to be displayed or undefined.
@@ -1305,7 +1305,7 @@ Visualizer.prototype.draw = function() {
 
 /**
  * Internal wrapper around mouse move events.
- * 
+ *
  * @private
  * @param mx
  *        {Number} the X coordinate of the mouse relative to the upper-left corner of the
@@ -1370,7 +1370,7 @@ Visualizer.prototype.mouseMoved = function(mx, my) {
 
 /**
  * Internal wrapper around mouse down events.
- * 
+ *
  * @private
  */
 Visualizer.prototype.mousePressed = function() {
@@ -1398,7 +1398,7 @@ Visualizer.prototype.mousePressed = function() {
 
 /**
  * Internal wrapper around mouse button release events.
- * 
+ *
  * @private
  */
 Visualizer.prototype.mouseReleased = function() {
@@ -1411,7 +1411,7 @@ Visualizer.prototype.mouseReleased = function() {
 
 /**
  * Internal wrapper around mouse exit window events.
- * 
+ *
  * @private
  */
 Visualizer.prototype.mouseExited = function() {
@@ -1424,7 +1424,7 @@ Visualizer.prototype.mouseExited = function() {
 
 /**
  * Internal wrapper around key press events.
- * 
+ *
  * @private
  * @param key
  *        A key code for the pressed button.
@@ -1619,7 +1619,7 @@ Options = function() {
 
 /**
  * Converts a string parameter in the URL to a boolean value.
- * 
+ *
  * @param value
  *        {String} the parameter
  * @returns {Boolean} true, if the parameter is either '1' or 'true'
@@ -1681,7 +1681,7 @@ State.prototype.cleanUp = function() {
 /**
  * Helper function to ask the {@link Replay} for the fog of war of the chosen
  * {@link State#fogPlayer} at the current {@link State#time}.
- * 
+ *
  * @returns {Boolean[][]} See {@link Replay#getFog}.
  */
 State.prototype.getFogMap = function() {

@@ -78,10 +78,10 @@ class Ants():
         'parse engine input and update the game state'
         # start timer
         self.turn_start_time = time.clock()
-        
+
         # reset vision
         self.vision = None
-        
+
         # clear ant and food data
         for (row, col), owner in self.ant_list.items():
             self.map[row][col] = LAND
@@ -115,13 +115,13 @@ class Ants():
 
     def time_remaining(self):
         return self.turntime - int(1000 * (time.clock() - self.turn_start_time))
-    
+
     def issue_order(self, order):
         'issue an order by writing the proper ant location and direction'
         (row, col), direction = order
         sys.stdout.write('o %s %s %s\n' % (row, col, direction))
         sys.stdout.flush()
-        
+
     def finish_turn(self):
         'finish the turn by writing the go line'
         sys.stdout.write('go\n')
@@ -146,7 +146,7 @@ class Ants():
         'true if not water'
         row, col = loc
         return self.map[row][col] > WATER
-    
+
     def unoccupied(self, loc):
         'true if no ants are at the location'
         row, col = loc
@@ -156,7 +156,7 @@ class Ants():
         'calculate a new location given the direction and wrap correctly'
         row, col = loc
         d_row, d_col = AIM[direction]
-        return ((row + d_row) % self.height, (col + d_col) % self.width)        
+        return ((row + d_row) % self.height, (col + d_col) % self.width)
 
     def distance(self, loc1, loc2):
         'calculate the closest distance between to locations'
@@ -226,7 +226,7 @@ class Ants():
                         squares_to_check.append((a_loc, n_loc))
         row, col = loc
         return self.vision[row][col]
-    
+
     def render_text_map(self):
         'return a pretty string representing the map'
         tmp = ''

@@ -39,7 +39,7 @@ function ImageManager(dataDir, callback) {
 /**
  * Announces an image that must be loaded. Calling this method after startRequests() results in
  * unexpected behavior.
- * 
+ *
  * @param {String}
  *        source The image name relative to the data directory.
  * @see #startRequests
@@ -53,7 +53,7 @@ ImageManager.prototype.add = function(source) {
 /**
  * We clean up the state of all images that failed to download in hope that they will succeed next
  * time. This does not apply to the applet version which handles these cases internally.
- * 
+ *
  * @see Visualizer#cleanUp
  */
 ImageManager.prototype.cleanUp = function() {
@@ -96,7 +96,7 @@ ImageManager.prototype.startRequests = function() {
 /**
  * Records the state of an image when the browser has finished loading it. If no more images are
  * pending, the visualizer is signaled.
- * 
+ *
  * @private
  * @param {HTMLImageElement}
  *        img The image that finished loading.
@@ -122,7 +122,7 @@ ImageManager.prototype.imgHandler = function(img, success) {
  * Generates a CanvasPattern for an image, which can be used as fillStyle in drawing operations to
  * create a repeated tile texture. The new pattern overrides the current pattern slot for the image
  * and activates the pattern for drawing.
- * 
+ *
  * @param {Number}
  *        idx The index of the image.
  * @param {CanvasRenderingContext2D}
@@ -140,7 +140,7 @@ ImageManager.prototype.pattern = function(idx, ctx, repeat) {
 /**
  * Sets the pattern of an image to a set of colorized copies of itself. Only gray pixels will be
  * touched. The new pattern overrides the current pattern slot for the image.
- * 
+ *
  * @param {Number}
  *        idx The index of the image.
  * @param {Array}

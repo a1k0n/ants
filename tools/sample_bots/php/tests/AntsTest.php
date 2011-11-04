@@ -59,7 +59,7 @@ class AntsTest extends PHPUnit_Framework_TestCase
         $this->assertType('array', $this->ants->map, 'Unexpected type of map');
         $this->assertEquals($this->ants->rows, count($this->ants->map), 'Number of rows in map doesn\'t match rows property');
         $this->assertEquals($this->ants->cols, count($this->ants->map[0]), 'Number of cols in map doesn\'t match cols property');
-    
+
         $this->assertEquals(LAND, $this->ants->map[2][2], 'Initial type of map tile isn\'t LAND');
     }
 
@@ -109,7 +109,7 @@ class AntsTest extends PHPUnit_Framework_TestCase
         $this->assertTrue( $this->ants->passable(5,5), 'Food is passable');
         $this->assertFalse( $this->ants->passable(3,3), 'Water is passable');
     }
-    
+
     /**
      * @depends testUpdate
      */

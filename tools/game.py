@@ -66,7 +66,7 @@ class Game:
     # can be used to determine fairness of game and other stuff for visualizers
     def get_stats(self):
         pass
-    
+
     # used for getting a compact replay of the game
     def get_replay(self):
         pass

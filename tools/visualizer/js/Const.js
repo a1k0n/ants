@@ -17,19 +17,19 @@ INT_TO_HEX = new Array(256);
 
 /**
  * width of left side panel
- * 
+ *
  * @const
  */
 var LEFT_PANEL_W = 40;
 /**
  * width of right side panel
- * 
+ *
  * @const
  */
 RIGHT_PANEL_W = 48;
 /**
  * height of bottom panel
- * 
+ *
  * @const
  */
 BOTTOM_PANEL_H = 64;
@@ -51,7 +51,7 @@ COLOR_MAPS = [[],
               [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ] ];
 /**
  * colors of players
- * 
+ *
  * @const
  */
 PLAYER_COLORS = [ [ 350, 59, 43 ], [ 20, 63, 46 ],
@@ -59,24 +59,24 @@ PLAYER_COLORS = [ [ 350, 59, 43 ], [ 20, 63, 46 ],
 	              [ 110, 45, 45 ], [ 155, 50, 60 ],
 	              [ 200, 65, 50 ], [ 250, 40, 60 ],
 		          [ 300, 45, 40 ], [ 325, 4, 45 ],
-		          
+
 		          [ 120, 95, 99 ] ];
 
 /**
  * color of food items
- * 
+ *
  * @const
  */
 FOOD_COLOR = hsl_to_rgb([ 30, 25, 70 ]);
 /**
  * color of land squares
- * 
+ *
  * @const
  */
 SAND_COLOR = rgb_to_hex(hsl_to_rgb([ 30, 35, 25 ]));
 /**
  * maximum pixel size of map squares
- * 
+ *
  * @const
  */
 ZOOM_SCALE = 20;
@@ -85,7 +85,7 @@ ZOOM_SCALE = 20;
  * The standard font in the visualizer. Be careful here, because my implementation of font string
  * parsing in the Java wrapper is not very resilient to changes. Check back if the font displays ok
  * there.
- * 
+ *
  * @const
  */
 FONT = 'bold 19px Arial,Sans';

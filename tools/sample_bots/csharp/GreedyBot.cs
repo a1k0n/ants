@@ -5,24 +5,24 @@ using System.Linq;
 namespace Ants {
 
 	class GreedyBot : Bot {
-		
+
 		Random rng;
-		
+
 		HashSet<Location> destinations;
-		
+
 		public GreedyBot () {
 			rng = new Random(42);
 			destinations = new HashSet<Location>(new LocationComparer());
 		}
-				
+
 		// doTurn is run once per turn
 		public override void doTurn (GameState state) {
-			
+
 			destinations.Clear();
-			
+
 			// loop through all my ants and try to give them orders
 			foreach (AntLoc ant in state.MyAnts) {
-				
+
 				Location closestFood = null;
 				int closestDist = int.MaxValue;
 				foreach (Location food in state.FoodTiles) {
@@ -32,18 +32,18 @@ namespace Ants {
 						closestFood = food;
 					}
 				}
-				
+
 				IEnumerable<char> directions;
 				if (closestFood != null) directions = state.direction(ant, closestFood);
 				else directions = Ants.Aim.Keys.Shuffle(rng);
-				
+
 				// try all the directions
 				foreach (char direction in directions) {
-					
+
 					// destination will wrap around the map properly
 					// and give us a new location
 					Location newLoc = state.destination(ant, direction);
-					
+
 					// passable returns true if the location is land
 					if (state.unoccupied(newLoc) && !destinations.Contains(newLoc)) {
 						issueOrder(ant, direction);
@@ -52,19 +52,19 @@ namespace Ants {
 						break;
 					}
 				}
-				
+
 				// check if we have time left to calculate more orders
 				if (state.TimeRemaining < 10) break;
 			}
-			
+
 		}
-		
+
 		public static void Main (string[] args) {
 			new Ants().playGame(new GreedyBot());
 		}
 
 	}
-	
+
 	public static class Extensions {
 		// Fisher-Yates shuffle courtesy of StackOverflow
 		public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random rng) {
@@ -81,7 +81,7 @@ namespace Ants {
 			foreach (T element in elements) {
 				yield return element;
 			}
-		}	
+		}
 	}
-	
+
 }

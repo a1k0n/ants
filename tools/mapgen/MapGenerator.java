@@ -63,21 +63,21 @@ public class MapGenerator {
      */
     public String map2String(int[][] map) {
         int ant = 0;
-        
+
         // This is totaly the wrong place to put this, but it's a quick ahck
         char[][] antss = {
-        		// 8 player
-        		{ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' },
-        		{ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' },
-        		{ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' },
-        		// 4 player
-        		{ 'a', 'a', 'b', 'c', 'b', 'c', 'd', 'd' },
-        		{ 'a', 'b', 'c', 'c', 'd', 'd', 'a', 'b' },
-        		{ 'a', 'b', 'a', 'b', 'c', 'd', 'c', 'd' },
-        		// 2 player
-        		{ 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b' },
-        		{ 'a', 'b', 'a', 'b', 'b', 'a', 'b', 'a' },
-        		{ 'a', 'b', 'b', 'a', 'a', 'b', 'b', 'a' }
+                // 8 player
+                { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' },
+                { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' },
+                { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' },
+                // 4 player
+                { 'a', 'a', 'b', 'c', 'b', 'c', 'd', 'd' },
+                { 'a', 'b', 'c', 'c', 'd', 'd', 'a', 'b' },
+                { 'a', 'b', 'a', 'b', 'c', 'd', 'c', 'd' },
+                // 2 player
+                { 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b' },
+                { 'a', 'b', 'a', 'b', 'b', 'a', 'b', 'a' },
+                { 'a', 'b', 'b', 'a', 'a', 'b', 'b', 'a' }
         };
         int player_count = 0;
         int sym = rnd.nextInt(9);
@@ -87,20 +87,20 @@ public class MapGenerator {
         case 0:
         case 1:
         case 2:
-        	player_count = 8;
-        	break;
+            player_count = 8;
+            break;
         // 4 players
         case 3:
         case 4:
         case 5:
-        	player_count = 4;
-        	break;
+            player_count = 4;
+            break;
         // 2 players
         case 6:
         case 7:
         case 8:
-        	player_count = 2;
-        	break;        	
+            player_count = 2;
+            break;
         }
         StringBuilder sb = new StringBuilder();
         sb.append("players " + Integer.toString(player_count) + "\n");
@@ -241,7 +241,7 @@ public class MapGenerator {
             }
         }
         else if (nbrOfPlayers == 8) {
-            mapPart = overlayMaps(mapPart, mirrorDiagonal(mapPart)); 
+            mapPart = overlayMaps(mapPart, mirrorDiagonal(mapPart));
 
             fullMap = new int[mapPart.length * 2][mapPart[0].length * 2];
             addMapPart(fullMap, mapPart, 0, 0);
