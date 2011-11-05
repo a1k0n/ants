@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <assert.h>
 
+//#define VERBOSE
+
 bool Ant::Move(State &s, int move)
 {
   if(move == move_)
@@ -17,11 +19,15 @@ bool Ant::Move(State &s, int move)
   if(newsq.nextAnt) return false;
   assert(oldsq.nextAnt == this);
 
-  double antscore = AntScore(s, this);
-  s.evalScore -= antscore;
+  if(team_ == 0) {
+    double antscore = AntScore(s, this);
+    s.evalScore -= antscore;
 #ifdef VERBOSE
-  fprintf(stderr, "Ant::Move: evalScore -AntScore %g\n", antscore);
+    fprintf(stderr, "Ant::Move: evalScore -AntScore %g\n", antscore);
 #endif
+  } else {
+    // FIXME: enemy ant score (distance to our hill, etc?)
+  }
 
   // penalize standing on a hill
   if(oldsq.isHill && oldsq.hillPlayer == 0) s.evalScore += 10;
@@ -31,26 +37,45 @@ bool Ant::Move(State &s, int move)
 
   double oldeval = s.evalScore;
   // update the distance grid and evaluation scores
-  s.updateAntPos(pos_, newpos);
+  if(team_ == 0) {
+    s.updateAntPos(pos_, newpos);
+  } else {
+    // FIXME: update enemy ant distances similarly
+  }
+
 #ifdef VERBOSE
   fprintf(stderr, "Ant::Move: evalScore updateAntPos(%d,%d->%d,%d) %+g\n",
           pos_.col, pos_.row, newpos.col, newpos.row,
           s.evalScore-oldeval);
 #endif
 
+  // Note: combat moves can affect multiple ants (both friendly and enemy)
+  // so doCombatMove will recursively update evalScore from each ant if there's
+  // a change
+
+  // undo the old move
+  s.doCombatMove(this, move_, -1);
+
   oldsq.nextAnt = NULL;
   newsq.nextAnt = this;
   pos_ = newpos;
   move_ = move;
 
+  // do the new move
+  s.doCombatMove(this, move, 1);
+
   // TODO: resolve battles with enemy ants with this ant added (maybe just by
   // updating the battle strength grid and then doing a final check during eval)
 
-  antscore = AntScore(s, this);
-  s.evalScore += antscore;
+  if(team_ == 0) {
+    double antscore = AntScore(s, this);
+    s.evalScore += antscore;
 #ifdef VERBOSE
-  fprintf(stderr, "Ant::Move: evalScore +AntScore %g\n", antscore);
+    fprintf(stderr, "Ant::Move: evalScore +AntScore %g dead_? %d\n", antscore, dead_);
 #endif
+  } else {
+    // FIXME: enemy ant score
+  }
 
   return true;
 }

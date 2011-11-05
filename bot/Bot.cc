@@ -48,7 +48,7 @@ double coinflip(double prob)
 // MAYBE TODO: use log(score) instead?
 double Bot::iterateAnt(double bestscore, Ant *a)
 {
-  Location orig_pos = a->pos_;
+  Location orig_pos = a->pos_.prev(a->move_);
 #ifdef VERBOSE
   fprintf(stderr, "moving ant @%d,%d\n", orig_pos.col, orig_pos.row);
 #endif
@@ -80,6 +80,40 @@ double Bot::iterateAnt(double bestscore, Ant *a)
   return bestscore;
 }
 
+double Bot::iterateEnemyAnt(double worstscore, Ant *a)
+{
+  Location orig_pos = a->pos_.prev(a->move_);
+#ifdef VERBOSE
+  fprintf(stderr, "moving enemy ant @%d,%d\n", orig_pos.col, orig_pos.row);
+#endif
+  int worstmove = a->move_;
+  int nequal = 1;
+  for(int m=0;m<TDIRECTIONS;m++) {
+    if(!a->Move(state, m))
+      continue;
+    double score = state.evalScore;
+#ifdef VERBOSE
+    cerr << "move("<<m<<") score="<<score<<endl;
+#endif
+    if(score < worstscore) {
+      worstscore = score;
+      worstmove = m;
+      nequal = 1;
+    } else if(score == worstscore) {
+      nequal++;
+      if(coinflip(1.0/nequal))
+        worstmove = m;
+    }
+  }
+  a->Move(state, worstmove);
+#ifdef VERBOSE
+  fprintf(stderr, "using move %d for enemy ant @%d,%d (score should be %g, is now %g)\n",
+          bestmove, orig_pos.col, orig_pos.row, worstscore, state.evalScore);
+#endif
+  worstscore = state.evalScore;
+  return worstscore;
+}
+
 //makes the bots moves for the turn
 void Bot::makeMoves()
 {
@@ -95,12 +129,16 @@ void Bot::makeMoves()
   for(size_t i=0;i<state.myAnts.size();i++) {
     score = iterateAnt(score, state.myAnts[i]);
   }
-#if 1
+
+  // evaluate enemy ant moves
+  for(size_t i=0;i<state.enemyAnts.size();i++) {
+    score = iterateEnemyAnt(score, state.enemyAnts[i]);
+  }
+
   // now re-evaluate in backwards order
   for(int i=(int)state.myAnts.size()-2;i>=0;i--) {
     score = iterateAnt(score, state.myAnts[i]);
   }
-#endif
 
   for(size_t i=0;i<state.myAnts.size();i++) {
     state.myAnts[i]->CommitMove(state);

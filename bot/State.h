@@ -60,6 +60,7 @@ struct State
   double distance2(const Location &loc1, const Location &loc2);
 
   void setViewRadius(int radius2);
+  void setAttackRadius(int radius2);
 
   void updateVisionInformation();
   void updateStateEstimate();
@@ -67,10 +68,14 @@ struct State
 
   // sort of a reverse-and-forward-dijkstra step
   void updateAntPos(const Location &oldpos, const Location &newpos);
+
+  void doCombatMove(Ant *a, int move, int direction);
+
   void dumpDistances(int type);
  private:
   void bfs(std::vector<Location> seed, int type);
   void updateAntVisibility(Ant *a);
+  void updateAntAttack(Ant *a);
   void computeCircleDelta(const Location &delta,
       std::vector<std::pair<Location, int> > *adjust,
       int viewBoxSize, int viewradius2);

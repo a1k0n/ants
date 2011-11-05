@@ -9,9 +9,10 @@
 
 // future-reward discount factor (usually gamma in reinforcement learning
 // literature)
-const float kDiscount = 0.8; // should be < 1/sqrt(2) for forward progress?
+const float kDiscount = 0.7; // should be < 1/sqrt(2) for forward progress?
 const float kFoodSpawnProb = 1.0/65536.0;
-const float kHillPriority = 1.0;
+const float kHillPriority = 10.0;
+const float kAntPriority = 1.0;
 
 static double ExploreScore(const State &state, const Square &sq) {
   int turndelta = state.turn - sq.lastSeen;
@@ -42,12 +43,14 @@ static double AntScore(const State &state, const Ant *ant) {
   // colliding ant is worth -1 but only one of the ants can be said to have
   // 'caused' the collision, so one of them is worth -2 and the other is worth 0
   const Square &sq = state.grid(ant->pos_);
+  double score = 0;
 
   int enemy_hill_dist = sq.distance[Square::DIST_ENEMY_HILLS];
   if(enemy_hill_dist != INT_MAX)
-    return kHillPriority*pow(kDiscount, sq.distance[Square::DIST_ENEMY_HILLS]);
-  else
-    return 0;
+    score += kHillPriority*pow(kDiscount, sq.distance[Square::DIST_ENEMY_HILLS]);
+  int enemy_ant_dist = sq.distance[Square::DIST_ENEMY_ANTS];
+    score += kAntPriority*pow(kDiscount, sq.distance[Square::DIST_ENEMY_ANTS]);
+  return score;
 }
 
 #endif // __SCORE_H

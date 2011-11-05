@@ -42,7 +42,8 @@ static bool operator<(const Location &a, const Location &b) {
 }
 
 static Location operator+(const Location &a, const Location &b) {
-  return Location(a.row+b.row, a.col+b.col);
+  return Location((a.row+b.row+Location::rows)%Location::rows,
+                  (a.col+b.col+Location::cols)%Location::cols);
 }
 
 #endif //LOCATION_H_

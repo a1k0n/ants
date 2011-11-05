@@ -90,7 +90,14 @@ void State::updateAntVisibility(Ant *a)
       }
     }
   }
+}
 
+void State::updateAntAttack(Ant *a)
+{
+  const Location &l = a->pos_;
+  int x0 = wrapCol(l.col - attackBoxSize),
+      y0 = wrapRow(l.row - attackBoxSize);
+  int r, c, dx, dy;
   // update attack information
   for(c = x0, dx = -attackBoxSize; dx <= attackBoxSize; dx++, c = c == cols-1 ? 0:c+1) {
     for(r = y0, dy = -attackBoxSize; dy <= attackBoxSize; dy++, r = r == rows-1 ? 0:r+1) {
@@ -98,11 +105,13 @@ void State::updateAntVisibility(Ant *a)
         continue;
       if(dx*dx + dy*dy <= attackradius2) {
         Square &sq = grid(r,c);
-        if(!sq.ant)
+        if(!sq.ant || sq.ant->team_ == a->team_)
           continue;
 
         a->enemies_.insert(sq.ant);
         sq.ant->enemies_.insert(a);
+        a->nEnemies_++;
+        sq.ant->nEnemies_++;
       }
     }
   }
@@ -113,6 +122,10 @@ void State::updateVisionInformation()
   evalScore = 0;
   for(int a=0; a<(int) myAnts.size(); a++) {
     updateAntVisibility(myAnts[a]);
+    updateAntAttack(myAnts[a]);
+  }
+  for(int a=0; a<(int) enemyAnts.size(); a++) {
+    updateAntAttack(enemyAnts[a]);
   }
 }
 
@@ -145,6 +158,11 @@ void State::updateDistanceInformation()
   for(int i = 0; i < myAnts.size(); ++i)
     seed.push_back(myAnts[i]->pos_);
   bfs(seed, Square::DIST_MY_ANTS);
+
+  seed.clear();
+  for(int i = 0; i < enemyAnts.size(); ++i)
+    seed.push_back(enemyAnts[i]->pos_);
+  bfs(seed, Square::DIST_ENEMY_ANTS);
 
   seed.clear();
   for(set<Location>::iterator i = enemyHills.begin();
@@ -322,21 +340,75 @@ void State::setViewRadius(int radius2)
 {
   viewradius2 = radius2;
   viewBoxSize = (int) sqrt(radius2);
-  for(int i=0;i<TDIRECTIONS;i++) {
-    visibilityAdjust[i].clear();
-    computeCircleDelta(Location(DIRECTIONS[i][0], DIRECTIONS[i][1]),
-                       &visibilityAdjust[i], viewBoxSize, viewradius2);
-    computeCircleDelta(Location(DIRECTIONS[i][0], DIRECTIONS[i][1]),
-                       &attackAdjust[i], attackBoxSize, attackradius2);
-    fprintf(stderr, "direction %c: adjust ", CDIRECTIONS[i]);
-    for(int j=0;j<visibilityAdjust[i].size();j++) {
-      const pair<Location, int> &adj = visibilityAdjust[i][j];
+  for(int m=0;m<TDIRECTIONS;m++) {
+    visibilityAdjust[m].clear();
+    computeCircleDelta(Location(DIRECTIONS[m][0], DIRECTIONS[m][1]),
+                       &visibilityAdjust[m], viewBoxSize, viewradius2);
+    fprintf(stderr, "direction %c: view adjust ", CDIRECTIONS[m]);
+    for(int j=0;j<visibilityAdjust[m].size();j++) {
+      const pair<Location, int> &adj = visibilityAdjust[m][j];
       fprintf(stderr, "(%d,%d,%+d) ", adj.first.col, adj.first.row, adj.second);
     }
     fprintf(stderr, "\n");
   }
 }
 
+void State::setAttackRadius(int radius2)
+{
+  attackradius2 = radius2;
+  attackBoxSize = (int) sqrt(radius2);
+  for(int m=0;m<TDIRECTIONS;m++) {
+    visibilityAdjust[m].clear();
+    computeCircleDelta(Location(DIRECTIONS[m][0], DIRECTIONS[m][1]),
+                       &attackAdjust[m], attackBoxSize, attackradius2);
+    fprintf(stderr, "direction %c: attack adjust ", CDIRECTIONS[m]);
+    for(int j=0;j<attackAdjust[m].size();j++) {
+      const pair<Location, int> &adj = attackAdjust[m][j];
+      fprintf(stderr, "(%d,%d,%+d) ", adj.first.col, adj.first.row, adj.second);
+    }
+    fprintf(stderr, "\n");
+  }
+}
+
+void State::doCombatMove(Ant *a, int move, int direction)
+{
+  if(move == -1)
+    return;
+  Location pos = a->pos_.prev(move);
+  for(size_t i=0;i<attackAdjust[move].size();i++) {
+    const pair<Location, int> &adj = attackAdjust[move][i];
+    const Square &sq = grid(adj.first + pos);
+    if(sq.nextAnt && sq.nextAnt->team_ != a->team_) {
+      // this could marginally be optimized by using 0 or ~0==-1 for direction
+      // and using ^ instead of *
+      if(adj.second*direction == 1) {
+        // add combat pair
+        a->enemies_.insert(sq.nextAnt);
+        sq.nextAnt->enemies_.insert(a);
+        a->nEnemies_++;
+        sq.nextAnt->nEnemies_++;
+      } else {
+        // remove combat pair
+        assert(a->enemies_.find(sq.nextAnt) != a->enemies_.end());
+        assert(sq.nextAnt->enemies_.find(a) != sq.nextAnt->enemies_.end());
+        a->enemies_.erase(sq.nextAnt);
+        sq.nextAnt->enemies_.erase(a);
+        a->nEnemies_--;
+        sq.nextAnt->nEnemies_--;
+      }
+      if(sq.nextAnt->dead_)
+        evalScore += sq.nextAnt->team_ == 0 ? 2 : -1;
+      sq.nextAnt->dead_ = sq.nextAnt->CheckCombatDeath();
+      if(sq.nextAnt->dead_)
+        evalScore -= sq.nextAnt->team_ == 0 ? 2 : -1;
+    }
+  }
+  if(a->dead_)
+    evalScore += a->team_ == 0 ? 1 : -1;
+  a->dead_ = a->CheckCombatDeath();
+  if(a->dead_)
+    evalScore -= a->team_ == 0 ? 1 : -1;
+}
 
 //input function
 istream& operator>>(istream &is, State &state)
@@ -387,7 +459,10 @@ istream& operator>>(istream &is, State &state)
       }
       else if(inputType == "attackradius2")
       {
-        is >> state.attackradius2;
+        int radius2;
+        is >> radius2;
+        if(radius2 != state.attackradius2)
+          state.setAttackRadius(radius2);
       }
       else if(inputType == "spawnradius2")
       {
