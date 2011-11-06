@@ -7,12 +7,14 @@
 #include <assert.h>
 #include <limits.h>
 
+//#define VERBOSE
+
 // future-reward discount factor (usually gamma in reinforcement learning
 // literature)
 const float kDiscount = 0.7; // should be < 1/sqrt(2) for forward progress?
 const float kFoodSpawnProb = 1.0/65536.0;
 const float kHillPriority = 10.0;
-const float kAntPriority = 1.0;
+const float kAntPriority = 1e-4;
 
 static double ExploreScore(const State &state, const Square &sq) {
   int turndelta = state.turn - sq.lastSeen;

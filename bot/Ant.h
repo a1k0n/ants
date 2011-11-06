@@ -34,6 +34,18 @@ struct Ant
     }
     return false;
   }
+
+  void dumpEnemies() {
+    if(enemies_.empty()) return;
+    std::set<Ant*>::iterator i = enemies_.begin();
+    fprintf(stderr, "enemies: ");
+    for(; i != enemies_.end(); ++i) {
+      Ant *e = *i;
+      Location l = e->pos_.prev(e->move_);
+      fprintf(stderr, "(%d,%d) ", l.col, l.row);
+    }
+    fprintf(stderr, "\n");
+  }
 };
 
 #endif

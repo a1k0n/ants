@@ -1,0 +1,51 @@
+
+distance:
+   f 1 2 3 a 2 1 f
+
+if we go right, as we obviously should:
+value: -1 per food per turn
+turn 0:  f...a..f  -2
+turn 1:  f....a.f  -2
+turn 2:  f.....a.  -1
+turn 3:  f....a..  -1
+turn 4:  f...a...  -1
+turn 5:  f..a....  -1
+turn 6:  f.a.....  -1
+turn 7:  .a......  0
+
+value(0,right): -9
+
+if we go left:
+turn 0:  f...a..f  -2
+turn 1:  f..a...f  -2
+turn 2:  f.a....f  -2
+turn 3:  .a.....f  -1
+turn 4:  ..a....f  -1
+turn 5:  ...a...f  -1
+turn 6:  ....a..f  -1
+turn 7:  .....a.f  -1
+turn 7:  ......a.  0
+
+value(0,left):  -11
+
+value:
+              __  <- start position
+  f  xx -7 -9 -9 -7 xx f
+  f  xx -1 -2 -3 -4 -5 .
+  .  -5 -4 -3 -2 -1 xx f
+  .   0 xx xx xx xx  0 .
+
+so, the problem with this approach is that we basically have to solve TSP (or
+whatever) in order to get the correct value function.  really, the ant should
+just go to the nearest food, always (and use the distance-from-food instead of
+distance-from-ant to solve it)
+
+so!  improving food collection from our current heuristic method will require
+an approximate TSP solver (it's not exactly TSP: it's not a cycle and we prefer
+getting food sooner than later).  what we should do for now is add a tiebreaker
+to the current thing to avoid ants getting stuck.
+
+And actually, we might as well do an exact solver, for only the nearest N food
+(e.g. 4) to the ant, ignoring food >N.  Ants only collect food for which they
+are the nearest ant.  Caveat: might oscillate as we re-plan.  Effectively, the
+value function then ignores all but the first food to visit on the optimal tour.

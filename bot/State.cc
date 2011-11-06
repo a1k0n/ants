@@ -70,7 +70,9 @@ void State::computeCircleDelta(const Location &delta,
                    ((x*x + y*y < viewradius2) ? 1 : 0));
       if(delta != 0)
         adjust->push_back(make_pair(Location(y,x), delta));
+      fputc((x==0)&&(y==0)?'O':delta == 0 ? '.' : delta == -1 ? '-' : '+', stderr);
     }
+    fputc('\n', stderr);
   }
 }
 
@@ -92,6 +94,13 @@ void State::updateAntVisibility(Ant *a)
   }
 }
 
+// This function is basically not necessary, as our initial turn shouldn't have
+// any ants within combat radius (as the combat would have already been
+// resolved).  However, combat resulting from ants spawning from hills can be
+// added by this function, so really we only need to check squares with hills.
+//
+// I'm leaving it as-is for now as it's the obvious and correct way to find all
+// combat pairs in general.
 void State::updateAntAttack(Ant *a)
 {
   const Location &l = a->pos_;
@@ -342,14 +351,9 @@ void State::setViewRadius(int radius2)
   viewBoxSize = (int) sqrt(radius2);
   for(int m=0;m<TDIRECTIONS;m++) {
     visibilityAdjust[m].clear();
+    fprintf(stderr, "direction %c: view adjust\n", CDIRECTIONS[m]);
     computeCircleDelta(Location(DIRECTIONS[m][0], DIRECTIONS[m][1]),
                        &visibilityAdjust[m], viewBoxSize, viewradius2);
-    fprintf(stderr, "direction %c: view adjust ", CDIRECTIONS[m]);
-    for(int j=0;j<visibilityAdjust[m].size();j++) {
-      const pair<Location, int> &adj = visibilityAdjust[m][j];
-      fprintf(stderr, "(%d,%d,%+d) ", adj.first.col, adj.first.row, adj.second);
-    }
-    fprintf(stderr, "\n");
   }
 }
 
@@ -359,25 +363,30 @@ void State::setAttackRadius(int radius2)
   attackBoxSize = (int) sqrt(radius2);
   for(int m=0;m<TDIRECTIONS;m++) {
     visibilityAdjust[m].clear();
+    fprintf(stderr, "direction %c: attack adjust\n", CDIRECTIONS[m]);
     computeCircleDelta(Location(DIRECTIONS[m][0], DIRECTIONS[m][1]),
                        &attackAdjust[m], attackBoxSize, attackradius2);
-    fprintf(stderr, "direction %c: attack adjust ", CDIRECTIONS[m]);
-    for(int j=0;j<attackAdjust[m].size();j++) {
-      const pair<Location, int> &adj = attackAdjust[m][j];
-      fprintf(stderr, "(%d,%d,%+d) ", adj.first.col, adj.first.row, adj.second);
-    }
-    fprintf(stderr, "\n");
   }
 }
 
+// move is the move direction; direction is 1 or -1 for forward or backward in
+// time (to do or undo a move, respectively)
 void State::doCombatMove(Ant *a, int move, int direction)
 {
   if(move == -1)
     return;
   Location pos = a->pos_.prev(move);
+#ifdef VERBOSE
+  fprintf(stderr, "doCombatMove((%d,%d),%d,%d): ",
+          pos.col, pos.row, move,direction);
+#endif
   for(size_t i=0;i<attackAdjust[move].size();i++) {
     const pair<Location, int> &adj = attackAdjust[move][i];
-    const Square &sq = grid(adj.first + pos);
+    Location l = adj.first + pos;
+    const Square &sq = grid(l);
+#ifdef VERBOSE
+    fprintf(stderr, "%c(%d,%d) ", adj.second*direction > 0 ? '+':'-', l.col, l.row);
+#endif
     if(sq.nextAnt && sq.nextAnt->team_ != a->team_) {
       // this could marginally be optimized by using 0 or ~0==-1 for direction
       // and using ^ instead of *
@@ -387,6 +396,11 @@ void State::doCombatMove(Ant *a, int move, int direction)
         sq.nextAnt->enemies_.insert(a);
         a->nEnemies_++;
         sq.nextAnt->nEnemies_++;
+#ifdef VERBOSE
+        fprintf(stderr, "+pair[(%d,%d,p%d),(%d,%d,p%d)] ",
+                a->pos_.col, a->pos_.row, a->team_,
+                sq.nextAnt->pos_.col, sq.nextAnt->pos_.row, sq.nextAnt->team_);
+#endif
       } else {
         // remove combat pair
         assert(a->enemies_.find(sq.nextAnt) != a->enemies_.end());
@@ -395,6 +409,11 @@ void State::doCombatMove(Ant *a, int move, int direction)
         sq.nextAnt->enemies_.erase(a);
         a->nEnemies_--;
         sq.nextAnt->nEnemies_--;
+#ifdef VERBOSE
+        fprintf(stderr, "-pair[(%d,%d,p%d),(%d,%d,p%d)] ",
+                a->pos_.col, a->pos_.row, a->team_,
+                sq.nextAnt->pos_.col, sq.nextAnt->pos_.row, sq.nextAnt->team_);
+#endif
       }
       if(sq.nextAnt->dead_)
         evalScore += sq.nextAnt->team_ == 0 ? 2 : -1;
@@ -404,10 +423,13 @@ void State::doCombatMove(Ant *a, int move, int direction)
     }
   }
   if(a->dead_)
-    evalScore += a->team_ == 0 ? 1 : -1;
+    evalScore += a->team_ == 0 ? 2 : -1;
   a->dead_ = a->CheckCombatDeath();
   if(a->dead_)
-    evalScore -= a->team_ == 0 ? 1 : -1;
+    evalScore -= a->team_ == 0 ? 2 : -1;
+#ifdef VERBOSE
+  fprintf(stderr, "-> dead=%d\n", a->dead_);
+#endif
 }
 
 //input function

@@ -59,7 +59,8 @@ double Bot::iterateAnt(double bestscore, Ant *a)
       continue;
     double score = state.evalScore;
 #ifdef VERBOSE
-    cerr << "move("<<m<<") score="<<score<<endl;
+    cerr << "move("<<m<<") score="<<score<<" dead_="<<a->dead_<<endl;
+    a->dumpEnemies();
 #endif
     if(score > bestscore) {
       bestscore = score;
@@ -93,7 +94,7 @@ double Bot::iterateEnemyAnt(double worstscore, Ant *a)
       continue;
     double score = state.evalScore;
 #ifdef VERBOSE
-    cerr << "move("<<m<<") score="<<score<<endl;
+    cerr << "move("<<m<<") score="<<score<<" dead_="<<a->dead_<<endl;
 #endif
     if(score < worstscore) {
       worstscore = score;
@@ -108,7 +109,7 @@ double Bot::iterateEnemyAnt(double worstscore, Ant *a)
   a->Move(state, worstmove);
 #ifdef VERBOSE
   fprintf(stderr, "using move %d for enemy ant @%d,%d (score should be %g, is now %g)\n",
-          bestmove, orig_pos.col, orig_pos.row, worstscore, state.evalScore);
+          worstmove, orig_pos.col, orig_pos.row, worstscore, state.evalScore);
 #endif
   worstscore = state.evalScore;
   return worstscore;

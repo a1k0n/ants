@@ -5,8 +5,6 @@
 #include <algorithm>
 #include <assert.h>
 
-//#define VERBOSE
-
 bool Ant::Move(State &s, int move)
 {
   if(move == move_)
@@ -39,15 +37,14 @@ bool Ant::Move(State &s, int move)
   // update the distance grid and evaluation scores
   if(team_ == 0) {
     s.updateAntPos(pos_, newpos);
+#ifdef VERBOSE
+    fprintf(stderr, "Ant::Move: evalScore updateAntPos(%d,%d->%d,%d) %+g\n",
+            pos_.col, pos_.row, newpos.col, newpos.row,
+            s.evalScore-oldeval);
+#endif
   } else {
     // FIXME: update enemy ant distances similarly
   }
-
-#ifdef VERBOSE
-  fprintf(stderr, "Ant::Move: evalScore updateAntPos(%d,%d->%d,%d) %+g\n",
-          pos_.col, pos_.row, newpos.col, newpos.row,
-          s.evalScore-oldeval);
-#endif
 
   // Note: combat moves can affect multiple ants (both friendly and enemy)
   // so doCombatMove will recursively update evalScore from each ant if there's
