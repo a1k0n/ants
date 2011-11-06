@@ -4,6 +4,7 @@
 #include "Location.h"
 
 #include <set>
+#include <stdio.h>
 
 struct State;
 struct Ant
@@ -15,12 +16,13 @@ struct Ant
   int move_;
   int nEnemies_;
   bool dead_;
+  bool combat_;
   std::set<Ant*> enemies_;
 
   Ant() { Init(); }
   Ant(int team, Location pos):team_(team), pos_(pos) { Init(); }
 
-  void Init() { move_ = -1; nEnemies_ = 0; dead_ = false; }
+  void Init() { move_ = -1; nEnemies_ = 0; dead_ = combat_ = false; }
 
   bool Move(State &s, int move);
   void CommitMove(State &s);
@@ -35,7 +37,6 @@ struct Ant
     return false;
   }
 
-#ifdef VERBOSE
   void dumpEnemies() {
     if(enemies_.empty()) return;
     std::set<Ant*>::iterator i = enemies_.begin();
@@ -47,7 +48,6 @@ struct Ant
     }
     fprintf(stderr, "\n");
   }
-#endif
 };
 
 #endif

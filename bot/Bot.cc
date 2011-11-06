@@ -155,6 +155,17 @@ void Bot::makeMoves()
     score = iterateAnt(score, state.myAnts[i]);
   }
 
+  // now anneal all ants in combat for a little while
+  for(int steps = 0; steps < 10; steps++) {
+    for(size_t i=0;i<state.antsInCombat.size();i++) {
+      Ant *a = state.antsInCombat[i];
+      if(a->team_ == 0)
+        score = iterateAnt(score, a);
+      else
+        score = iterateEnemyAnt(score, a);
+    }
+  }
+
   for(size_t i=0;i<state.myAnts.size();i++) {
     state.myAnts[i]->CommitMove(state);
   }

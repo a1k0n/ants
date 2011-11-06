@@ -33,6 +33,7 @@ void State::reset()
   myAnts.clear();
   enemyAnts.clear();
   myHills.clear();
+  antsInCombat.clear();
   for(int row=0; row<rows; row++)
     for(int col=0; col<cols; col++)
       if(!grid(row,col).isWater)
@@ -120,7 +121,9 @@ void State::updateAntAttack(Ant *a)
         a->enemies_.insert(sq.ant);
         sq.ant->enemies_.insert(a);
         a->nEnemies_++;
+        addCombatAnt(a);
         sq.ant->nEnemies_++;
+        addCombatAnt(sq.ant);
       }
     }
   }
@@ -395,7 +398,9 @@ void State::doCombatMove(Ant *a, int move, int direction)
         a->enemies_.insert(sq.nextAnt);
         sq.nextAnt->enemies_.insert(a);
         a->nEnemies_++;
+        addCombatAnt(a);
         sq.nextAnt->nEnemies_++;
+        addCombatAnt(sq.nextAnt);
       } else {
         // remove combat pair
         assert(a->enemies_.find(sq.nextAnt) != a->enemies_.end());
