@@ -52,12 +52,19 @@ double Bot::iterateAnt(double bestscore, Ant *a)
 #ifdef VERBOSE
   fprintf(stderr, "moving ant @%d,%d\n", orig_pos.col, orig_pos.row);
 #endif
-  int bestmove = a->move_;
+  int origmove = a->move_;
+  double origscore = bestscore;
+  int bestmove = origmove;
   int nequal = 1;
-  for(int m=0;m<TDIRECTIONS;m++) {
-    if(!a->Move(state, m))
-      continue;
-    double score = state.evalScore;
+  for(int m=-1;m<TDIRECTIONS;m++) {
+    double score;
+    if(m == origmove) {
+      score = origscore;
+    } else {
+      if(!a->Move(state, m))
+        continue;
+      score = state.evalScore;
+    }
 #ifdef VERBOSE
     cerr << "move("<<m<<") score="<<score<<" dead_="<<a->dead_<<endl;
     a->dumpEnemies();
@@ -87,12 +94,19 @@ double Bot::iterateEnemyAnt(double worstscore, Ant *a)
 #ifdef VERBOSE
   fprintf(stderr, "moving enemy ant @%d,%d\n", orig_pos.col, orig_pos.row);
 #endif
-  int worstmove = a->move_;
+  int origmove = a->move_;
+  double origscore = worstscore;
+  int worstmove = origmove;
   int nequal = 1;
   for(int m=0;m<TDIRECTIONS;m++) {
-    if(!a->Move(state, m))
-      continue;
-    double score = state.evalScore;
+    double score;
+    if(m == origmove) {
+      score = origscore;
+    } else {
+      if(!a->Move(state, m))
+        continue;
+      score = state.evalScore;
+    }
 #ifdef VERBOSE
     cerr << "move("<<m<<") score="<<score<<" dead_="<<a->dead_<<endl;
 #endif

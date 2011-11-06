@@ -66,8 +66,8 @@ void State::computeCircleDelta(const Location &delta,
     for(int x = -viewBoxSize-1; x <= viewBoxSize+1; x++) {
       int dx = x-delta.col,
           dy = y-delta.row;
-      int delta = (((dx*dx + dy*dy < viewradius2) ? 1 : 0) -
-                   ((x*x + y*y < viewradius2) ? 1 : 0));
+      int delta = (((dx*dx + dy*dy <= viewradius2) ? 1 : 0) -
+                   ((x*x + y*y <= viewradius2) ? 1 : 0));
       if(delta != 0)
         adjust->push_back(make_pair(Location(y,x), delta));
       fputc((x==0)&&(y==0)?'O':delta == 0 ? '.' : delta == -1 ? '-' : '+', stderr);
@@ -396,11 +396,6 @@ void State::doCombatMove(Ant *a, int move, int direction)
         sq.nextAnt->enemies_.insert(a);
         a->nEnemies_++;
         sq.nextAnt->nEnemies_++;
-#ifdef VERBOSE
-        fprintf(stderr, "+pair[(%d,%d,p%d),(%d,%d,p%d)] ",
-                a->pos_.col, a->pos_.row, a->team_,
-                sq.nextAnt->pos_.col, sq.nextAnt->pos_.row, sq.nextAnt->team_);
-#endif
       } else {
         // remove combat pair
         assert(a->enemies_.find(sq.nextAnt) != a->enemies_.end());
@@ -409,24 +404,26 @@ void State::doCombatMove(Ant *a, int move, int direction)
         sq.nextAnt->enemies_.erase(a);
         a->nEnemies_--;
         sq.nextAnt->nEnemies_--;
-#ifdef VERBOSE
-        fprintf(stderr, "-pair[(%d,%d,p%d),(%d,%d,p%d)] ",
-                a->pos_.col, a->pos_.row, a->team_,
-                sq.nextAnt->pos_.col, sq.nextAnt->pos_.row, sq.nextAnt->team_);
-#endif
       }
       if(sq.nextAnt->dead_)
-        evalScore += sq.nextAnt->team_ == 0 ? 2 : -1;
+        evalScore -= sq.nextAnt->team_ == 0 ? -2 : 1;
       sq.nextAnt->dead_ = sq.nextAnt->CheckCombatDeath();
       if(sq.nextAnt->dead_)
-        evalScore -= sq.nextAnt->team_ == 0 ? 2 : -1;
+        evalScore += sq.nextAnt->team_ == 0 ? -2 : 1;
+#ifdef VERBOSE
+      fprintf(stderr, "%cpair[(%d,%d,p%d,d%d),(%d,%d,p%d,d%d)] ",
+              adj.second*direction > 0 ? '+' : '-',
+              a->pos_.col, a->pos_.row, a->team_, a->dead_,
+              sq.nextAnt->pos_.col, sq.nextAnt->pos_.row,
+              sq.nextAnt->team_, sq.nextAnt->dead_);
+#endif
     }
   }
   if(a->dead_)
-    evalScore += a->team_ == 0 ? 2 : -1;
+    evalScore -= a->team_ == 0 ? -2 : 1;
   a->dead_ = a->CheckCombatDeath();
   if(a->dead_)
-    evalScore -= a->team_ == 0 ? 2 : -1;
+    evalScore += a->team_ == 0 ? -2 : 1;
 #ifdef VERBOSE
   fprintf(stderr, "-> dead=%d\n", a->dead_);
 #endif
