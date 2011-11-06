@@ -35,6 +35,7 @@ struct Ant
     return false;
   }
 
+#ifdef VERBOSE
   void dumpEnemies() {
     if(enemies_.empty()) return;
     std::set<Ant*>::iterator i = enemies_.begin();
@@ -46,6 +47,7 @@ struct Ant
     }
     fprintf(stderr, "\n");
   }
+#endif
 };
 
 #endif
