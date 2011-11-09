@@ -1,0 +1,149 @@
+we're going to assume viewradius2=5 and it isn't going to change.
+
+.......    ...9...
+..xxx..    .85458.
+.xxxxx.    .52125.
+.xxAxx.    9410149
+.xxxxx.    .52125.
+..xxx..    .85458.
+.......    ...9...
+
+So, if our ants encounter enemy ants, how likely are we to survive?  -1*B^n for
+losing an ant on turn n, +1*B^n for killing an enemy ant on turn n.  This
+problem is obviously symmetric, so we will choose to reflect such that the most
+enemy ants are in the upper left (but there could be extra ants elsewhere; the
+key space is complexly sparse by this definition -- can we come up with a
+simpler keyspace symmetry rule?)
+
+let's consider the following spaces:
+
+   yyy
+  yyyyy
+ yyxxxyy
+yyxxxxxyy
+yyxxAxxyy
+yyxxxxxyy
+ yyxxxyy
+  yyyyy
+   yyy
+
+okay that's going to be way too many.  hmm.  plus we need to account for water.
+
+------------------------------------------------------
+territory is extremely important.
+
+one of the most salient features (now i'm talking like i'm going to build a
+machine-learned regression) is probably going to be "mobility": a value derived
+from diffusing the map such that each square has the discounted number of edges
+available. e.g.
+xxxx
+x122
+x233
+x233
+(where "available" here assumes you're not standing still and not going back the way you came)
+
+except to compute this we'd just put a 1 everywhere and run N diffusion steps,
+sending k*value (k<0.25) in all directions so that value = sum_t(value_t);
+value_0 = 1, value_t = sum incoming_t; outgoing_t = k*value_t-1.  e.g. two
+adjacent squares:
+
+  1       1
+  1+k     1+k
+  1+k+k^2 1+k+k^2
+
+etc, until convergence (1/(1-E*k) for E edges in this simple example, but more
+complex maps would diffuse stuff usefully.  i would propose k=kDiscount/4
+initally)
+
+------------------------------------------------------
+in the general case, we want an approximation to the full dynamic programming
+solution of the value function, which is equal to the future-discounted minimax
+value of the current state.  e.g. if we are guaranteed a win in 5 moves, the
+value is kDiscount^5.  if we lose in 5 moves, it's -kDiscount^5.  if it's
+perfectly balanced, it's 0.
+
+if we can solve some simple situations exactly by this metric, maybe we can try
+to approximate and generalize?
+
+to generate an exact state matrix, we need to come up with a minimal situation,
+enumerate all terminal states with -1 or 1 or 0, and then use dynamic
+programming to work backwards to all other states.
+
+first utterly trivial, minimal scenario:
+ 123
+%%%%%
+%aa1%1
+%112%2
+%445%3
+%   %4
+% 54%5
+% 21%6
+% 1b%7
+%%%%%
+
+2v1 has 21*20*19 possible states on this map, so is trivially enumerable
+
+we can generate the set of terminal nodes just by placing 'b', and then placing
+one or both 'a's within the attack radius.  if both are in the attack radius,
+the score is +1; if one is in the attack radius, the score is 0 (one ant dies).
+
+so let's run that experiment.
+
+----
+
+okay, the results of the experiment are pretty interesting.  if one player
+knows the other player's moves, he can usually force an even exchange of ants
+even when outnumbered and cornered.  so a payoff matrix is necessary here to
+account for the fact that we don't know our opponent's moves.  which means an
+approach like monte-carlo sampling will probably not be suboptimal.
+
+here's a simple scenario:
+
+.a.     ...    ...    ..a
+a..     .a.    ax.    .a.
+...  -> x.. or ... or ...
+...     ...    ..b    ...
+..b     .b.    ...    .b.
+
+if b knows a's moves, he can either avoid a indefinitely or take out one of a's
+ants with him.  so, we need to pick the move with the maximum expected reward,
+assuming the opponent is doing the same...
+
+if b stays still, he can be killed.  so we have to assume he won't do it, ever.
+i'm thinking the monte carlo approach is best.  except we need to
+find/eliminate strictly dominated moves from each side, and find relative
+probabilities for the remainder.  somehow, via sampling (or exhaustive
+enumeration if there are a small enough number of ants involved).
+
+----
+
+new idea: collapsed gibbs sampling of ants.
+
+there is an inherent N-dimensional payoff "space" for N ants.  we cannot
+possibly hope to explore this exhaustively for N > 5? 6?.  especially if we
+want to look a few moves ahead.  supposing N <= 5, however, we can eliminate
+"dominated" moves -- moves where no matter what the opponents (or our other
+ants) do, our payoff would be better with another move.  for moves that aren't
+eliminated, we choose randomly by the proportion that they are the expected
+best thing to do.  (or by the expected reward, but this isn't as likely to be
+useful from what i can tell).  this of course depends on the probability
+distribution that the enemy picks a particular move, which in turn depends on
+what the enemy thinks our probability of moving is.  blah blah, Nash
+equilibria, &c, &c.
+
+since this is all so complicated, it seems to me that even for a small number
+of ants, the best strategy is to sample.  use a Dirichlet(1) distribution for
+each ant's moves, and move each ant randomly.  then, for each ant, increment
+the Dirichlet parameter for each move which wins for that configuration.
+re-sample according to the new distribution, repeat until unspecified stopping
+criteria.
+
+then, to decide on a strategy for each ant, we continue the procedure except:
+ - we start fixing ants into particular locations, one at a time.
+ - we eliminate the initial 1 from each Dirichlet parameter when choosing a
+   move to fix, so we only choose strategies that have dominated (or tied)
+
+this way our ants sample based on the chosen actions of the ants "fixed" so
+far, instead of the full distribution.
+
+let's run a second experiment on this before we commit to it.
