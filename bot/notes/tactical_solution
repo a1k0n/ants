@@ -152,3 +152,49 @@ this can be applied across multiple timesteps in a useful way.  we will still
 need heuristics to guide loose ants toward combat as reinforcements.
 
 let's run a second experiment on this before we commit to it.
+
+sample 999 ant 0 -=0 E=0 S=0 dirichlet=[-:977 N:0 E:977 S:502 W:708] sampled_dir=E value=0
+sample 999 ant 1 -=0 N=0 E=0 S=-1 dirichlet=[-:931 N:727 E:510 S:321 W:0] sampled_dir=- value=0
+sample 999 ant 2 -=0 N=0 W=0 dirichlet=[-:636 N:960 E:0 S:0 W:708] sampled_dir=- value=0
+
+for the scenario above, it looks like the recommendation is:
+
+.a.     .a.    ..a
+a..     a..    a..
+...  -> ... or ... with equal probability
+...     ..b    ..b
+..b     ...    ...
+
+and then, assuming the first one:
+sample 999 ant 0 -=0 E=0 S=-1 dirichlet=[-:692 N:0 E:692 S:529 W:329] sampled_dir=E value=0
+sample 999 ant 1 -=-1 N=0 E=-1 S=-1 dirichlet=[-:698 N:478 E:302 S:525 W:0] sampled_dir=- value=-1
+sample 999 ant 2 -=0 N=1 S=0 W=-1 dirichlet=[-:516 N:365 E:0 S:109 W:661] sampled_dir=N value=1
+
+.a.    a.a  ...
+a..    ...  a.a
+... -> ...? ...
+..b    .b.  ...
+...    ...  ...
+
+---
+
+okay, the fatal flaw in the above is we're assuming conditional independence of
+each ant's move, which is a hideously bad assumption here.  our ants have to
+coordinate moves, so each ant needs to know, at a minimum, what at least one
+nearby ant is doing.  tracking more than one ant's per ant would be a huge
+state space, but i think if we form a "chain" of conditional dependence (markov
+chain i suppose?) along the front lines of an ant battle, the ants should be
+able to coordinate very well.  the chain of dependence could also be a tree
+without loss of generality:
+
+a  a  a
+|  |  |
+v  v  v
+a->a->a
+
+b<-b<-b
+^  ^  ^
+|  |  |
+b  b  b
+
+let's update the experiment.

@@ -13,7 +13,7 @@
 
 using namespace std;
 
-const int kWidth = 3, kHeight = 4;
+const int kWidth = 3, kHeight = 5;
 const int kNAnts1 = 2, kNAnts2 = 1;
 const int kNAnts = kNAnts1 + kNAnts2;
 const int kNPositions = kWidth*kHeight;
@@ -64,15 +64,20 @@ struct Ant
   }
 
   int SampleMove(void) {
-    int dir, sum;
+    int dir, sum=0;
+    bool can_move[5];
     for(dir = 0;dir<5; dir++) {
       // check whether another ant is in the way
-      if(Move(dir))
+      can_move[dir] = Move(dir);
+      if(can_move[dir])
         sum += dirichlet_[dir];
     }
     int idx = lrand48() % sum;
-    for(dir = 0;idx >= dirichlet_[dir] && dir < 4; dir++)
-      idx -= dirichlet_[dir];
+    // this is ugly as hell but works
+    for(dir = 0;!can_move[dir] || idx >= dirichlet_[dir] && dir < 4; dir++) {
+      if(can_move[dir])
+        idx -= dirichlet_[dir];
+    }
     Move(dir);
     return dir;
   }
@@ -99,6 +104,10 @@ double State::Value() {
 
 bool State::IsColliding(Ant *a)
 {
+  if(ants_.size() < 2) return false;
+  return (ants_[0]->x_ == ants_[1]->x_ &&
+          ants_[0]->y_ == ants_[1]->y_);
+#if 0
   for(size_t i=0;i<ants_.size();i++) {
     if(ants_[i] == a) continue;
     if(ants_[i]->x_ == a->x_ &&
@@ -107,33 +116,39 @@ bool State::IsColliding(Ant *a)
       return true;
   }
   return false;
+#endif
 }
 
 int main()
 {
   // set up scenario:
-  // .A.       ...
-  // A..    -> .A.
-  // ...       A..
-  // ..B       .b.
+  // .A.      .A.
+  // A..      A..
+  // ...  ->  ...
+  // ...      ..B
+  // ..B      ...
 
   state.ants_.push_back(new Ant(0, 1,0));
   state.ants_.push_back(new Ant(0, 0,1));
   state.ants_.push_back(new Ant(1, 2,3));
 
-  for(int i=0;i<1000;i++) {
+
+  for(int i=0;i<10000;i++) {
     for(int a=0;a<state.ants_.size();a++) {
       printf("sample %d ant %d ", i, a);
       Ant *ant = state.ants_[a];
       bool minimize = ant->team_ == 0 ? false : true;
       int bestvalue = minimize ? INT_MAX : INT_MIN;
-      int bestmoves[5], nbest = 0;
+      int bestmoves[5], nbest = 0, ndifferent = 0;
+      int lastvalue = bestvalue;
       for(int move=0;move<5;move++) {
         if(ant->Move(move)) {
           int value = state.Value();
           printf("%c=%d ", directions[move][2], value);
-          if((minimize && value < bestvalue && value < 0) ||
-             (!minimize && value > bestvalue && value > 0)) {
+          if(value != lastvalue)
+            ndifferent++;
+          if((minimize && value < bestvalue) ||
+             (!minimize && value > bestvalue)) {
             nbest = 0;
             bestvalue = value;
             bestmoves[nbest++] = move;
@@ -143,14 +158,18 @@ int main()
         }
       }
       // update dirichlet distribution
+      // there should be more than 1 unique score for us to bother updating
+      if(ndifferent > 1) {
+        for(int d=0;d<nbest;d++)
+          ant->dirichlet_[bestmoves[d]]++;
+      }
       printf("dirichlet=[");
       for(int d=0;d<5;d++)
         printf("%c:%d ", directions[d][2], ant->dirichlet_[d]);
       printf("\b] ");
-      for(int d=0;d<nbest;d++)
-        ant->dirichlet_[bestmoves[d]]++;
       // sample new move for this ant
       int move = ant->SampleMove();
+      //if(a == 0) { move = 3; ant->Move(3); }
       int value = state.Value();
       printf("sampled_dir=%c value=%d\n", directions[move][2], value);
     }
