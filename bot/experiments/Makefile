@@ -12,9 +12,12 @@ EXECUTABLES=$(SOURCES:.cc=)
 all: $(EXECUTABLES)
 
 tactics: tactics.o
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CC) $(LDFLAGS) tactics.o -o $@
 
-.cc.o: *.h
+gibbs: gibbs.o
+	$(CC) $(LDFLAGS) gibbs.o -o $@
+
+.cc.o:
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

@@ -146,4 +146,9 @@ then, to decide on a strategy for each ant, we continue the procedure except:
 this way our ants sample based on the chosen actions of the ants "fixed" so
 far, instead of the full distribution.
 
+the thing about this is, it's not a multi-step solution; this would be the
+solution to just one step in a minimax chain.  it remains to be seen whether
+this can be applied across multiple timesteps in a useful way.  we will still
+need heuristics to guide loose ants toward combat as reinforcements.
+
 let's run a second experiment on this before we commit to it.
