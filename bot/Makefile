@@ -1,5 +1,6 @@
 CC=g++
 CFLAGS=-O3 -g -funroll-loops -c
+#CFLAGS=-g
 LDFLAGS=-O2 -lm
 SOURCES=$(wildcard *.cc)
 OBJECTS=$(SOURCES:.cc=.o)
@@ -14,7 +15,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
 .cc.o: *.h
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	-rm -f ${EXECUTABLE} ${OBJECTS} *.d

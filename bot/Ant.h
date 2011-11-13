@@ -12,20 +12,44 @@ struct Ant
   // pos_ is the current position of the ant (implied after the move) -- to get
   // the original position, use pos_.prev(move_).
   int team_;
-  Location pos_;
+  Location pos_, origPos_;
   int move_;
   int nEnemies_;
   bool dead_;
   bool combat_;
   std::set<Ant*> enemies_;
 
-  Ant() { Init(); }
-  Ant(int team, Location pos):team_(team), pos_(pos) { Init(); }
+  double moveScore_[5], lossScore_;
 
-  void Init() { move_ = -1; nEnemies_ = 0; dead_ = combat_ = false; }
+  // Dirichlet distribution of superior moves, obtained via Gibbs sampling
+  int dirichlet_[5*5];
+  // ant which we are conditionally dependent on
+  Ant* dependency_;
 
-  bool Move(State &s, int move);
+  Ant() { dependency_ = NULL;  Init(); }
+  Ant(int team, Location pos):team_(team), pos_(pos), origPos_(pos) {
+    dependency_ = NULL; Init();
+  }
+
+  void Init() {
+    move_ = 0; nEnemies_ = 0; dead_ = combat_ = false;
+    for(int j=0;j<5*5;j++)
+      dirichlet_[j] = 1;
+  }
+
+  bool CanMove(State &s, int move);
+
+  // evaluate territory changes
+  bool TerritoryMove(State &s, int move);
+  // evaluate ant combat moves
+  bool CheapMove(State &s, int move);
+  int GibbsStep(State &s);
+  int SampleMove(State &s);
+
   void CommitMove(State &s);
+
+  // populate moveScore_
+  void ComputeDeltaScores(State &s);
 
   bool CheckCombatDeath() {
     double damage = 0;

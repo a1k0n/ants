@@ -44,8 +44,13 @@ static double AntScore(const State &state, const Ant *ant) {
   // this is slightly tricky when there are two colliding ants, since each
   // colliding ant is worth -1 but only one of the ants can be said to have
   // 'caused' the collision, so one of them is worth -2 and the other is worth 0
+  if(ant->dead_)
+    return 0;
   const Square &sq = state.grid(ant->pos_);
-  double score = 0;
+
+  // existence of this ant counts for some fixed number of points; if the ant
+  // dies, we gain/lose those points
+  double score = ant->team_ == 0 ? 2 : -1;
 
   int enemy_hill_dist = sq.distance[Square::DIST_ENEMY_HILLS];
   if(enemy_hill_dist != INT_MAX)

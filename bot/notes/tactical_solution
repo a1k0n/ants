@@ -198,3 +198,18 @@ b<-b<-b
 b  b  b
 
 let's update the experiment.
+
+---
+
+yes, that appears to work.  e.g.:
+
+ AA.      ..A      ...
+ ...      A..      ..A
+ ...  ->  ...  ->  A..
+ ...      ..B      .b.
+ ..B      ...      ...
+
+let's try it with a larger set of ants.
+
+yep.  works pretty well.  implemented, in the bot; replaced stupid ad-hoc
+forward-backward sweep with gibbs sampling.

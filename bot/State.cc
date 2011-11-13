@@ -43,6 +43,8 @@ void State::reset()
 //outputs move information to the engine
 void State::CommitMove(const Location &loc, int direction)
 {
+  if(direction == 0)
+    return;
   cout << "o " << loc.row << " " << loc.col << " " << CDIRECTIONS[direction] << endl;
 }
 
@@ -202,7 +204,7 @@ void State::bfs(vector<Location> seed, int type)
       if(sq.distance[type] != INT_MAX) continue;
       sq.distance[type] = dist;
       evalScore += SquareScore(*this, sq);
-      for(int d=0;d<4;d++) {
+      for(int d=1;d<5;d++) {
         Location next = l.next(d);
         if(grid(next).isWater) continue;
         if(grid(next).distance[type] != INT_MAX) continue;
@@ -256,7 +258,7 @@ void State::updateAntPos(const Location &oldpos, const Location &newpos)
       Square &sq = grid(l);
       if(sq.distance[Square::DIST_MY_ANTS] == INT_MAX) continue;
       if(sq.distance[Square::DIST_MY_ANTS] == dist) {
-        for(int d=0;d<4;d++) {
+        for(int d=1;d<5;d++) {
           Location next = l.next(d);
           if(grid(next).isWater) continue;
           if(grid(next).distance[Square::DIST_MY_ANTS] == INT_MAX) continue;
@@ -286,7 +288,7 @@ void State::updateAntPos(const Location &oldpos, const Location &newpos)
       continue;
     sq.distance[Square::DIST_MY_ANTS] = dist;
     evalScore += SquareScore(*this, sq);
-    for(int d=0;d<4;d++) {
+    for(int d=1;d<5;d++) {
       Location next = l.next(d);
       if(grid(next).isWater) continue;
       if(grid(next).distance[Square::DIST_MY_ANTS] != INT_MAX) continue;
@@ -376,7 +378,7 @@ void State::setAttackRadius(int radius2)
 // time (to do or undo a move, respectively)
 void State::doCombatMove(Ant *a, int move, int direction)
 {
-  if(move == -1)
+  if(move == 0)
     return;
   Location pos = a->pos_.prev(move);
 #ifdef VERBOSE
@@ -424,11 +426,11 @@ void State::doCombatMove(Ant *a, int move, int direction)
 #endif
     }
   }
-  if(a->dead_)
-    evalScore -= a->team_ == 0 ? -2 : 1;
+//  if(a->dead_)
+//    evalScore -= a->team_ == 0 ? -2 : 1;
   a->dead_ = a->CheckCombatDeath();
-  if(a->dead_)
-    evalScore += a->team_ == 0 ? -2 : 1;
+//  if(a->dead_)
+//    evalScore += a->team_ == 0 ? -2 : 1;
 #ifdef VERBOSE
   fprintf(stderr, "-> dead=%d\n", a->dead_);
 #endif

@@ -13,10 +13,7 @@
 
 using namespace std;
 
-const int kWidth = 3, kHeight = 5;
-const int kNAnts1 = 2, kNAnts2 = 1;
-const int kNAnts = kNAnts1 + kNAnts2;
-const int kNPositions = kWidth*kHeight;
+const int kWidth = 5, kHeight = 5;
 const int kAttackRadius2 = 5;
 
 const int kAlpha = 1; // alpha parameter of dirichlet distribution
@@ -40,17 +37,26 @@ struct State
 
 struct Ant
 {
+  Ant *pred_; // predecessor ant we are conditionally dependent on
   int team_, x0_, y0_;
   int x_, y_, dir_;
-  int dirichlet_[5];
+  int dirichlet_[5*5];
+  int nEnemies_;
+  double damage_;
 
-  Ant(int team, int x, int y): team_(team), x0_(x), y0_(y) { Init(); }
+  Ant(Ant *pred, int team, int x, int y):
+    pred_(pred), team_(team), x0_(x), y0_(y) { Init(); }
+
   void Init() {
     x_ = x0_;
     y_ = y0_;
-    for(int i=0;i<5;i++) {
-      // initialize invalid moves to 0 probability
-      dirichlet_[i] = Move(i) ? kAlpha : 0;
+    for(int j=0;j<5*5;j+=5) {
+      if(pred_)
+        pred_->Move(j);
+      for(int i=0;i<5;i++) {
+        // initialize invalid moves to 0 probability
+        dirichlet_[j+i] = Move(i) ? kAlpha : 0;
+      }
     }
   }
 
@@ -66,17 +72,20 @@ struct Ant
   int SampleMove(void) {
     int dir, sum=0;
     bool can_move[5];
+    int dir_base = 0;
+    if(pred_)
+      dir_base = 5*pred_->dir_;
     for(dir = 0;dir<5; dir++) {
       // check whether another ant is in the way
       can_move[dir] = Move(dir);
       if(can_move[dir])
-        sum += dirichlet_[dir];
+        sum += dirichlet_[dir_base+dir];
     }
     int idx = lrand48() % sum;
     // this is ugly as hell but works
-    for(dir = 0;!can_move[dir] || idx >= dirichlet_[dir] && dir < 4; dir++) {
+    for(dir = 0;!can_move[dir] || idx >= dirichlet_[dir_base+dir] && dir < 4; dir++) {
       if(can_move[dir])
-        idx -= dirichlet_[dir];
+        idx -= dirichlet_[dir_base+dir];
     }
     Move(dir);
     return dir;
@@ -91,23 +100,40 @@ int distance2(const Ant *a, const Ant *b) {
 
 // returns 0 if unknown, nonzero if favorable one way or another
 double State::Value() {
-  // here we assume for simplicity a 3-ant scenario
-  bool a02 = distance2(ants_[0], ants_[2]) <= kAttackRadius2;
-  bool a12 = distance2(ants_[1], ants_[2]) <= kAttackRadius2;
-  if(a02 && a12) {
-    return 1;
-  } else if(a02 || a12) {
-    return -1;
+  double score = 0;
+  // compute number of enemies for each ant
+  for(int i=0;i<ants_.size();i++) {
+    ants_[i]->nEnemies_ = 0;
+    ants_[i]->damage_ = 0;
   }
-  return 0;
+  for(int i=0;i<ants_.size() && ants_[i]->team_ == 0;i++) { // assume all player 0 ants are first
+    for(int j=4;j<ants_.size();j++) { // FIXME: assume player 1 ants start at 4
+      if(distance2(ants_[i], ants_[j]) <= kAttackRadius2) {
+        ants_[i]->nEnemies_++;
+        ants_[j]->nEnemies_++;
+      }
+    }
+  }
+
+  for(int i=0;i<ants_.size() && ants_[i]->team_ == 0;i++) { // assume all player 0 ants are first
+    for(int j=4;j<ants_.size();j++) { // FIXME: assume player 1 ants start at 4
+      if(distance2(ants_[i], ants_[j]) <= kAttackRadius2) {
+        ants_[i]->damage_ += 1.0/ants_[j]->nEnemies_;
+        ants_[j]->damage_ += 1.0/ants_[i]->nEnemies_;
+      }
+    }
+  }
+
+  for(int i=0;i<ants_.size();i++) {
+    if(ants_[i]->damage_ >= 1)
+      score += ants_[i]->team_ == 0 ? -2 : 1;
+  }
+
+  return score;
 }
 
 bool State::IsColliding(Ant *a)
 {
-  if(ants_.size() < 2) return false;
-  return (ants_[0]->x_ == ants_[1]->x_ &&
-          ants_[0]->y_ == ants_[1]->y_);
-#if 0
   for(size_t i=0;i<ants_.size();i++) {
     if(ants_[i] == a) continue;
     if(ants_[i]->x_ == a->x_ &&
@@ -116,24 +142,38 @@ bool State::IsColliding(Ant *a)
       return true;
   }
   return false;
-#endif
 }
 
 int main()
 {
+  srand48(time(NULL) + getpid());
   // set up scenario:
-  // .A.      .A.
-  // A..      A..
-  // ...  ->  ...
-  // ...      ..B
-  // ..B      ...
+  //  01234
+  // 0AAAA.    A.AA.   ....A
+  // 1.....    A....   AA.a.
+  // 2..... -> ..... ->....b
+  // 3.....    ..BBB   ..bB.
+  // 4..BBB    .....   .....
 
-  state.ants_.push_back(new Ant(0, 1,0));
-  state.ants_.push_back(new Ant(0, 0,1));
-  state.ants_.push_back(new Ant(1, 2,3));
+#if 0
+  state.ants_.push_back(new Ant(NULL,           0, 0,0));
+  state.ants_.push_back(new Ant(state.ants_[0], 0, 1,0));
+  state.ants_.push_back(new Ant(state.ants_[1], 0, 2,0));
+  state.ants_.push_back(new Ant(state.ants_[2], 0, 3,0));
+  state.ants_.push_back(new Ant(NULL,           1, 2,4));
+  state.ants_.push_back(new Ant(state.ants_[4], 1, 3,4));
+  state.ants_.push_back(new Ant(state.ants_[5], 1, 4,4));
+#else
+  state.ants_.push_back(new Ant(NULL,           0, 0,1));
+  state.ants_.push_back(new Ant(state.ants_[0], 0, 0,0));
+  state.ants_.push_back(new Ant(state.ants_[1], 0, 2,0));
+  state.ants_.push_back(new Ant(state.ants_[2], 0, 3,0));
+  state.ants_.push_back(new Ant(NULL,           1, 2,3));
+  state.ants_.push_back(new Ant(state.ants_[4], 1, 3,3));
+  state.ants_.push_back(new Ant(state.ants_[5], 1, 4,3));
+#endif
 
-
-  for(int i=0;i<10000;i++) {
+  for(int i=0;i<1000;i++) {
     for(int a=0;a<state.ants_.size();a++) {
       printf("sample %d ant %d ", i, a);
       Ant *ant = state.ants_[a];
@@ -157,15 +197,20 @@ int main()
           }
         }
       }
+
+      int dir_base = 0;
+      if(ant->pred_)
+        dir_base = 5*ant->pred_->dir_;
+
       // update dirichlet distribution
       // there should be more than 1 unique score for us to bother updating
       if(ndifferent > 1) {
         for(int d=0;d<nbest;d++)
-          ant->dirichlet_[bestmoves[d]]++;
+          ant->dirichlet_[dir_base+bestmoves[d]]++;
       }
-      printf("dirichlet=[");
+      printf("dirichlet(%d)=[", dir_base/5);
       for(int d=0;d<5;d++)
-        printf("%c:%d ", directions[d][2], ant->dirichlet_[d]);
+        printf("%c:%d ", directions[d][2], ant->dirichlet_[dir_base+d]);
       printf("\b] ");
       // sample new move for this ant
       int move = ant->SampleMove();
@@ -174,4 +219,31 @@ int main()
       printf("sampled_dir=%c value=%d\n", directions[move][2], value);
     }
   }
+  for(int a=0;a<state.ants_.size();a++) {
+    Ant *ant = state.ants_[a];
+    printf("ant %d (team %d) maximum likelihood: ", a, ant->team_);
+    int dir_base = 0;
+    int bestvalue = INT_MIN,
+        bestmove = 0;
+    if(ant->pred_)
+      dir_base = 5*ant->pred_->dir_;
+    printf("dirichlet(%d)=[", dir_base/5);
+    for(int d=0;d<5;d++) {
+      int dirparam = ant->dirichlet_[dir_base+d];
+      if(dirparam > bestvalue) {
+        bestvalue = dirparam;
+        bestmove = d;
+      }
+      printf("%c:%d ", directions[d][2], dirparam);
+    }
+    printf("\b] ");
+    printf("moving %c\n", directions[bestmove][2]);
+    ant->Move(bestmove);
+  }
+  printf("final value = %g (", state.Value());
+  for(int a=0;a<state.ants_.size();a++) {
+    Ant *ant = state.ants_[a];
+    printf("%c", ant->damage_ >= 1.0 ? 'a'+ant->team_ : 'A' + ant->team_);
+  }
+  printf(")\n");
 }
