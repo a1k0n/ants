@@ -114,13 +114,18 @@ static bool coinflip(double c)
 
 void Ant::CommitMove(State &s)
 {
-  fprintf(stderr, "ant %p (team %d) maximum likelihood: ", this, team_);
+  fprintf(stderr, "ant (%d,%d) (team %d) maximum likelihood: ",
+          pos_.col, pos_.row, team_);
   int dir_base = 0;
   double bestvalue = -DBL_MAX;
   int bestmove = 0, nbest = 0;
-  if(dependency_)
-    dir_base = 5*dependency_->move_;
-  fprintf(stderr, "maximizing dirichlet(dep=%c)=[", CDIRECTIONS[dir_base/5]);
+  if(dependUp_)
+    dir_base += 5*dependUp_->move_;
+  if(dependLeft_)
+    dir_base += 25*dependLeft_->move_;
+  fprintf(stderr, "maximizing dirichlet(dep=%c,%c)=[",
+          CDIRECTIONS[(dir_base/5)%5],
+          CDIRECTIONS[(dir_base/25)%5]);
   for(int d=0;d<5;d++) {
     if(!CanMove(s, d))
       continue;
@@ -154,7 +159,8 @@ void Ant::ComputeDeltaScores(State &s)
     TerritoryMove(s, i);
     moveScore_[i] = s.evalScore - baseScore;
 #ifdef BLAH
-    fprintf(stderr, "ant %p move %c=%g\n", this,
+    fprintf(stderr, "ant (%d,%d) move %c=%g\n",
+            origPos_.col, origPos_.row,
             CDIRECTIONS[i], moveScore_[i]);
 #endif
   }
@@ -165,8 +171,10 @@ int Ant::SampleMove(State &s)
   int dir, sum=0;
   bool can_move[5];
   int dir_base = 0;
-  if(dependency_)
-    dir_base = 5*dependency_->move_;
+  if(dependUp_)
+    dir_base += 5*dependUp_->move_;
+  if(dependLeft_)
+    dir_base += 25*dependLeft_->move_;
   for(dir = 0;dir<5; dir++) {
     // check whether another ant is in the way
     can_move[dir] = CanMove(s, dir);
@@ -199,7 +207,8 @@ int Ant::GibbsStep(State &s)
     if(CheapMove(s, move)) {
       double value = s.evalScore + moveScore_[move];
 #ifdef BLAH
-      fprintf(stderr, "ant %p %c=(%g%+g)=%g\n", this, CDIRECTIONS[move],
+      fprintf(stderr, "ant (%d,%d) %c=(%g%+g)=%g\n",
+              origPos_.col, origPos_.row, CDIRECTIONS[move],
               s.evalScore, moveScore_[move], value);
 #endif
       if(value != lastvalue)
@@ -216,8 +225,10 @@ int Ant::GibbsStep(State &s)
   }
 
   int dir_base = 0;
-  if(dependency_)
-    dir_base = 5*dependency_->move_;
+  if(dependUp_)
+    dir_base += 5*dependUp_->move_;
+  if(dependLeft_)
+    dir_base += 25*dependLeft_->move_;
 
   // update dirichlet distribution
   // there should be more than 1 unique score for us to bother updating
@@ -226,8 +237,10 @@ int Ant::GibbsStep(State &s)
       dirichlet_[dir_base+bestmoves[d]]++;
   }
 #ifdef BLAH
-  fprintf(stderr, "ant %p updating dirichlet(%c)=[", this,
-          CDIRECTIONS[dir_base/5]);
+  fprintf(stderr, "ant (%d,%d) dirichlet(dep=%c,%c)=[",
+          pos_.col, pos_.row,
+          CDIRECTIONS[(dir_base/5)%5],
+          CDIRECTIONS[(dir_base/25)%5]);
   for(int d=0;d<5;d++) {
     if(!CanMove(s, d)) continue;
     fprintf(stderr, "%c:%d ", CDIRECTIONS[d], dirichlet_[dir_base+d]);
@@ -237,7 +250,8 @@ int Ant::GibbsStep(State &s)
 
   int move = SampleMove(s);
 #ifdef BLAH
-  fprintf(stderr, "ant %p sampled_dir=%c value=%g\n", this,
+  fprintf(stderr, "ant (%d,%d) sampled_dir=%c value=%g\n",
+          pos_.col, pos_.row,
           CDIRECTIONS[move], s.evalScore);
 #endif
   return move;

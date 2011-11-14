@@ -413,10 +413,10 @@ void State::doCombatMove(Ant *a, int move, int direction)
         sq.nextAnt->nEnemies_--;
       }
       if(sq.nextAnt->dead_)
-        evalScore -= sq.nextAnt->team_ == 0 ? -2 : 1;
+        evalScore -= sq.nextAnt->team_ == 0 ? -20 : 1;
       sq.nextAnt->dead_ = sq.nextAnt->CheckCombatDeath();
       if(sq.nextAnt->dead_)
-        evalScore += sq.nextAnt->team_ == 0 ? -2 : 1;
+        evalScore += sq.nextAnt->team_ == 0 ? -20 : 1;
 #ifdef VERBOSE
       fprintf(stderr, "%cpair[(%d,%d,p%d,d%d),(%d,%d,p%d,d%d)] ",
               adj.second*direction > 0 ? '+' : '-',
@@ -426,11 +426,11 @@ void State::doCombatMove(Ant *a, int move, int direction)
 #endif
     }
   }
-//  if(a->dead_)
-//    evalScore -= a->team_ == 0 ? -2 : 1;
+  if(a->dead_)
+    evalScore -= a->team_ == 0 ? -20 : 1;
   a->dead_ = a->CheckCombatDeath();
-//  if(a->dead_)
-//    evalScore += a->team_ == 0 ? -2 : 1;
+  if(a->dead_)
+    evalScore += a->team_ == 0 ? -20 : 1;
 #ifdef VERBOSE
   fprintf(stderr, "-> dead=%d\n", a->dead_);
 #endif

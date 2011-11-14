@@ -19,21 +19,24 @@ struct Ant
   bool combat_;
   std::set<Ant*> enemies_;
 
+  // FIXME
+  //double scoreContrib_;
+
   double moveScore_[5], lossScore_;
 
   // Dirichlet distribution of superior moves, obtained via Gibbs sampling
-  int dirichlet_[5*5];
-  // ant which we are conditionally dependent on
-  Ant* dependency_;
+  int dirichlet_[5*5*5];
+  // ants which we are conditionally dependent on
+  Ant *dependUp_, *dependLeft_;
 
-  Ant() { dependency_ = NULL;  Init(); }
+  Ant() { dependUp_ = dependLeft_ = NULL;  Init(); }
   Ant(int team, Location pos):team_(team), pos_(pos), origPos_(pos) {
-    dependency_ = NULL; Init();
+    dependUp_ = dependLeft_ = NULL; Init();
   }
 
   void Init() {
     move_ = 0; nEnemies_ = 0; dead_ = combat_ = false;
-    for(int j=0;j<5*5;j++)
+    for(int j=0;j<5*5*5;j++)
       dirichlet_[j] = 1;
   }
 
