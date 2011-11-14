@@ -26,6 +26,7 @@ struct Ant
 
   // Dirichlet distribution of superior moves, obtained via Gibbs sampling
   int dirichlet_[5*5*5];
+  int converged_[5*5];
   // ants which we are conditionally dependent on
   Ant *dependUp_, *dependLeft_;
 
@@ -38,6 +39,8 @@ struct Ant
     move_ = 0; nEnemies_ = 0; dead_ = combat_ = false;
     for(int j=0;j<5*5*5;j++)
       dirichlet_[j] = 1;
+    for(int j=0;j<5*5;j++)
+      converged_[j] = -1;
   }
 
   bool CanMove(State &s, int move);
