@@ -22,7 +22,9 @@ bool Ant::TerritoryMove(State &s, int move)
 
   // TODO: resolve battles with enemy ants with this ant removed
 
+#ifdef VERBOSE
   double oldeval = s.evalScore;
+#endif
   // update the distance grid and evaluation scores
   if(team_ == 0) {
     s.updateAntPos(pos_, newpos);
@@ -73,8 +75,8 @@ bool Ant::CheapMove(State &s, int move)
 
   // penalize standing on a hill
   // does this even belong here?
-  if(oldsq.isHill && oldsq.hillPlayer == 0) s.evalScore += 10;
-  if(newsq.isHill && newsq.hillPlayer == 0) s.evalScore -= 10;
+  if(oldsq.isHill && oldsq.hillPlayer == 0) s.evalScore += 1;
+  if(newsq.isHill && newsq.hillPlayer == 0) s.evalScore -= 1;
 
   // undo the old move
   s.doCombatMove(this, move_, -1);
@@ -123,7 +125,11 @@ void Ant::CommitMove(State &s)
       continue;
     if(!nsamples_[dir_base+d])
       continue;
+#if 1
+    double value = dirichlet_[dir_base+d];
+#else
     double value = rewardsum_[dir_base+d]/nsamples_[dir_base+d];
+#endif
     if(value > bestvalue) {
       bestvalue = value;
       bestmove = d;

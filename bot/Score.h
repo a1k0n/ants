@@ -12,22 +12,32 @@
 // future-reward discount factor (usually gamma in reinforcement learning
 // literature)
 const float kDiscount = 0.7; // should be < 1/sqrt(2) for forward progress?
-const float kFoodSpawnProb = 1.0/65536.0;
-const float kHillOffensePriority = 10.0;
-const float kHillDefensePriority = 50.0;
+const float kFoodSpawnProb = 5.0/65536.0;
+const float kHillOffensePriority = 5.0;
+const float kHillDefensePriority = 10.0;
 const float kEnemyPriority = 1e-4;
 const float kTieBreaker = 1e-6;
-const float kMyAntValue = 2.0;
+const float kMyAntValue = 5.0;
 const float kEnemyAntValue = 1.0;
 
-static double ExploreScore(const State &state, const Square &sq) {
+static inline double ExploreScore(const State &state, const Square &sq) {
+  double score = 0;
   int turndelta = state.turn - sq.lastSeen;
-  return kFoodSpawnProb * turndelta *
+  score += kFoodSpawnProb * turndelta *
     pow(kDiscount, sq.distance[Square::DIST_MY_ANTS]);
- // + kTieBreaker * pow(kDiscount, sq.distance[Square::DIST_FRONTIER]);
+  if(sq.isHill && sq.hillPlayer == 0) {
+    int enemy_dist = sq.distance[Square::DIST_ENEMY_ANTS];
+    int my_dist = sq.distance[Square::DIST_MY_ANTS];
+    if(enemy_dist != INT_MAX && my_dist != INT_MAX)
+      score -= pow(kDiscount, my_dist - enemy_dist);
+    if(sq.visibility == 0)
+      score --;
+  }
+  // + kTieBreaker * pow(kDiscount, sq.distance[Square::DIST_FRONTIER]);
+  return score;
 }
 
-static double FoodScore(const State &state, const Square &sq) {
+static inline double FoodScore(const State &state, const Square &sq) {
   // FIXME: if an ant goes between three pieces of food, such that going
   // towards one moves away from two others (usually one of them has to be
   // equidistant) then the ant will get stuck with this metric.  we need a way
@@ -37,14 +47,14 @@ static double FoodScore(const State &state, const Square &sq) {
   return pow(kDiscount, sq.distance[Square::DIST_MY_ANTS] - 1);
 }
 
-static double SquareScore(const State &state, const Square &sq) {
+static inline double SquareScore(const State &state, const Square &sq) {
   double score = ExploreScore(state, sq);
   if(sq.isFood)
    score += FoodScore(state, sq);
   return score;
 }
 
-static double AntScore(const State &state, const Ant *ant) {
+static inline double AntScore(const State &state, const Ant *ant) {
   // contribution of score from this ant
   if(ant->dead_)
     return 0;

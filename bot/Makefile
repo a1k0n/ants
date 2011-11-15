@@ -1,6 +1,6 @@
 CC=g++
-CFLAGS=-O3 -g -funroll-loops -c
-#CFLAGS=-g
+CFLAGS=-O3 -g -funroll-loops -Wall
+#CFLAGS=-g -Wall
 LDFLAGS=-O2 -lm
 SOURCES=$(wildcard *.cc)
 OBJECTS=$(SOURCES:.cc=.o)

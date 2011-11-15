@@ -87,8 +87,6 @@ void Bot::makeMoves()
   fprintf(stderr, "turn %d:\n", state.turn);
   cerr << state << endl;
 
-  double score = state.evalScore;
-
 #ifdef VERBOSE
   state.dumpDistances(Square::DIST_MY_ANTS);
 #endif

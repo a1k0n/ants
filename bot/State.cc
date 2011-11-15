@@ -167,12 +167,12 @@ void State::updateDistanceInformation()
 {
   // compute pathfinding info for food, hills, etc
   vector<Location> seed;
-  for(int i = 0; i < myAnts.size(); ++i)
+  for(size_t i = 0; i < myAnts.size(); ++i)
     seed.push_back(myAnts[i]->pos_);
   bfs(seed, Square::DIST_MY_ANTS);
 
   seed.clear();
-  for(int i = 0; i < enemyAnts.size(); ++i)
+  for(size_t i = 0; i < enemyAnts.size(); ++i)
     seed.push_back(enemyAnts[i]->pos_);
   bfs(seed, Square::DIST_ENEMY_ANTS);
 
