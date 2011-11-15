@@ -16,7 +16,7 @@ struct Ant
   int move_;
   int nEnemies_;
   bool dead_;
-  bool combat_;
+  bool committed_;
   std::set<Ant*> enemies_;
 
   // FIXME
@@ -36,7 +36,7 @@ struct Ant
   }
 
   void Init() {
-    move_ = 0; nEnemies_ = 0; dead_ = combat_ = false;
+    move_ = 0; nEnemies_ = 0; dead_ = committed_ = false;
     for(int j=0;j<5*5*5;j++)
       dirichlet_[j] = 1;
     for(int j=0;j<5*5;j++)

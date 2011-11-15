@@ -70,11 +70,6 @@ struct State
   // sort of a reverse-and-forward-dijkstra step
   void updateAntPos(const Location &oldpos, const Location &newpos);
 
-  void addCombatAnt(Ant *a) {
-    if(a->combat_) return;
-    a->combat_ = true;
-    antsInCombat.push_back(a);
-  }
   void doCombatMove(Ant *a, int move, int direction);
 
   void dumpDistances(int type);

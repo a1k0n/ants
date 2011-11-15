@@ -114,15 +114,21 @@ static bool coinflip(double c)
 
 void Ant::CommitMove(State &s)
 {
-  fprintf(stderr, "ant (%d,%d) (team %d) maximum likelihood: ",
-          origPos_.col, origPos_.row, team_);
+  if(committed_)
+    return;
   int dir_base = 0;
   double bestvalue = -DBL_MAX;
   int bestmove = 0, nbest = 0;
-  if(dependUp_)
+  if(dependUp_) {
+    dependUp_->CommitMove(s);
     dir_base += 5*dependUp_->move_;
-  if(dependLeft_)
+  }
+  if(dependLeft_) {
+    dependLeft_->CommitMove(s);
     dir_base += 25*dependLeft_->move_;
+  }
+  fprintf(stderr, "ant (%d,%d) (team %d): ",
+          origPos_.col, origPos_.row, team_);
   fprintf(stderr, "maximizing dirichlet(dep=%c,%c, conv=%d)=[",
           CDIRECTIONS[(dir_base/5)%5],
           CDIRECTIONS[(dir_base/25)%5],
@@ -149,6 +155,7 @@ void Ant::CommitMove(State &s)
           s.evalScore, moveScore_[bestmove], value);
   fprintf(stderr, "moving %c\n", CDIRECTIONS[bestmove]);
 
+  committed_ = true;
   s.CommitMove(origPos_, move_);
 }
 

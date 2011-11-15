@@ -123,9 +123,7 @@ void State::updateAntAttack(Ant *a)
         a->enemies_.insert(sq.ant);
         sq.ant->enemies_.insert(a);
         a->nEnemies_++;
-        addCombatAnt(a);
         sq.ant->nEnemies_++;
-        addCombatAnt(sq.ant);
       }
     }
   }
@@ -400,9 +398,7 @@ void State::doCombatMove(Ant *a, int move, int direction)
         a->enemies_.insert(sq.nextAnt);
         sq.nextAnt->enemies_.insert(a);
         a->nEnemies_++;
-        addCombatAnt(a);
         sq.nextAnt->nEnemies_++;
-        addCombatAnt(sq.nextAnt);
       } else {
         // remove combat pair
         assert(a->enemies_.find(sq.nextAnt) != a->enemies_.end());
