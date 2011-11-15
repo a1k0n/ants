@@ -19,14 +19,14 @@ struct Ant
   bool committed_;
   std::set<Ant*> enemies_;
 
-  // FIXME
-  //double scoreContrib_;
+  double scoreContrib_;
 
-  double moveScore_[5], lossScore_;
+  double moveScore_[5];
 
   // Dirichlet distribution of superior moves, obtained via Gibbs sampling
   int dirichlet_[5*5*5];
-  int converged_[5*5];
+  double rewardsum_[5*5*5];
+  int converged_[5*5*5], nsamples_[5*5*5];
   // ants which we are conditionally dependent on
   Ant *dependUp_, *dependLeft_;
 
@@ -36,11 +36,16 @@ struct Ant
   }
 
   void Init() {
+    scoreContrib_ = 0;
     move_ = 0; nEnemies_ = 0; dead_ = committed_ = false;
-    for(int j=0;j<5*5*5;j++)
+    for(int j=0;j<5*5*5;j++) {
       dirichlet_[j] = 1;
-    for(int j=0;j<5*5;j++)
+      rewardsum_[j] = 0;
+      nsamples_[j] = 0;
+    }
+    for(int j=0;j<5*5;j++) {
       converged_[j] = -1;
+    }
   }
 
   bool CanMove(State &s, int move);
@@ -56,6 +61,8 @@ struct Ant
 
   // populate moveScore_
   void ComputeDeltaScores(State &s);
+
+  void UpdateScore(State &s);
 
   bool CheckCombatDeath() {
     double damage = 0;

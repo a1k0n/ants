@@ -21,8 +21,10 @@ struct Square
 
   enum {
     DIST_MY_ANTS = 0,
+    DIST_MY_HILLS,
     DIST_ENEMY_ANTS,
     DIST_ENEMY_HILLS,
+    DIST_FRONTIER,
     NUM_DISTANCES
   };
   int distance[NUM_DISTANCES];

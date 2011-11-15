@@ -177,10 +177,25 @@ void State::updateDistanceInformation()
   bfs(seed, Square::DIST_ENEMY_ANTS);
 
   seed.clear();
+  for(set<Location>::iterator i = myHills.begin();
+      i != myHills.end(); ++i)
+    seed.push_back(*i);
+  bfs(seed, Square::DIST_MY_HILLS);
+
+  seed.clear();
   for(set<Location>::iterator i = enemyHills.begin();
       i != enemyHills.end(); ++i)
     seed.push_back(*i);
   bfs(seed, Square::DIST_ENEMY_HILLS);
+
+  seed.clear();
+  for(int r=0;r<rows;r++) {
+    for(int c=0;c<cols;c++) {
+      if(grid(r,c).lastSeen == 0)
+        seed.push_back(Location(r,c));
+    }
+  }
+  bfs(seed, Square::DIST_FRONTIER);
 }
 
 // do full BFS path from all (FIXME) ants (or whatever else)
@@ -379,7 +394,7 @@ void State::doCombatMove(Ant *a, int move, int direction)
   if(move == 0)
     return;
   Location pos = a->pos_.prev(move);
-#ifdef VERBOSE
+#ifdef VERBOSE1
   fprintf(stderr, "doCombatMove((%d,%d),%d,%d): ",
           pos.col, pos.row, move,direction);
 #endif
@@ -387,7 +402,7 @@ void State::doCombatMove(Ant *a, int move, int direction)
     const pair<Location, int> &adj = attackAdjust[move][i];
     Location l = adj.first + pos;
     const Square &sq = grid(l);
-#ifdef VERBOSE
+#ifdef VERBOSE1
     fprintf(stderr, "%c(%d,%d) ", adj.second*direction > 0 ? '+':'-', l.col, l.row);
 #endif
     if(sq.nextAnt && sq.nextAnt->team_ != a->team_) {
@@ -408,12 +423,10 @@ void State::doCombatMove(Ant *a, int move, int direction)
         a->nEnemies_--;
         sq.nextAnt->nEnemies_--;
       }
-      if(sq.nextAnt->dead_)
-        evalScore -= sq.nextAnt->team_ == 0 ? -20 : 1;
+      // update score for sq.nextAnt
       sq.nextAnt->dead_ = sq.nextAnt->CheckCombatDeath();
-      if(sq.nextAnt->dead_)
-        evalScore += sq.nextAnt->team_ == 0 ? -20 : 1;
-#ifdef VERBOSE
+      sq.nextAnt->UpdateScore(*this);
+#ifdef VERBOSE1
       fprintf(stderr, "%cpair[(%d,%d,p%d,d%d),(%d,%d,p%d,d%d)] ",
               adj.second*direction > 0 ? '+' : '-',
               a->pos_.col, a->pos_.row, a->team_, a->dead_,
@@ -422,12 +435,9 @@ void State::doCombatMove(Ant *a, int move, int direction)
 #endif
     }
   }
-  if(a->dead_)
-    evalScore -= a->team_ == 0 ? -20 : 1;
+  // assume score update for a will be done afterwards
   a->dead_ = a->CheckCombatDeath();
-  if(a->dead_)
-    evalScore += a->team_ == 0 ? -20 : 1;
-#ifdef VERBOSE
+#ifdef VERBOSE1
   fprintf(stderr, "-> dead=%d\n", a->dead_);
 #endif
 }

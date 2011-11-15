@@ -27,9 +27,9 @@ bool Ant::TerritoryMove(State &s, int move)
   if(team_ == 0) {
     s.updateAntPos(pos_, newpos);
 #ifdef VERBOSE
-    fprintf(stderr, "Ant::Move: evalScore updateAntPos(%d,%d->%d,%d) %+g\n",
+    fprintf(stderr, "Ant::Move: evalScore updateAntPos(%d,%d->%d,%d) %+g=%g\n",
             origPos_.col, origPos_.row, newpos.col, newpos.row,
-            s.evalScore-oldeval);
+            s.evalScore-oldeval, scoreContrib_);
 #endif
   } else {
     // FIXME: update enemy ant distances similarly
@@ -71,16 +71,6 @@ bool Ant::CheapMove(State &s, int move)
   if(newsq.nextAnt) return false;
   assert(oldsq.nextAnt == this);
 
-  if(team_ == 0) {
-    double antscore = AntScore(s, this);
-    s.evalScore -= antscore;
-#ifdef VERBOSE
-    fprintf(stderr, "Ant::Move: evalScore -AntScore %g\n", antscore);
-#endif
-  } else {
-    // FIXME: enemy ant score (distance to our hill, etc?)
-  }
-
   // penalize standing on a hill
   // does this even belong here?
   if(oldsq.isHill && oldsq.hillPlayer == 0) s.evalScore += 10;
@@ -97,12 +87,7 @@ bool Ant::CheapMove(State &s, int move)
   // do the new move
   s.doCombatMove(this, move, 1);
 
-  if(team_ == 0) {
-    double antscore = AntScore(s, this);
-    s.evalScore += antscore;
-  } else {
-    // FIXME: enemy ant score
-  }
+  UpdateScore(s);
 
   return true;
 }
@@ -136,17 +121,20 @@ void Ant::CommitMove(State &s)
   for(int d=0;d<5;d++) {
     if(!CanMove(s, d))
       continue;
-    int dirparam = dirichlet_[dir_base+d];
-    if(dirparam > bestvalue) {
-      bestvalue = dirparam;
+    if(!nsamples_[dir_base+d])
+      continue;
+    double value = rewardsum_[dir_base+d]/nsamples_[dir_base+d];
+    if(value > bestvalue) {
+      bestvalue = value;
       bestmove = d;
       nbest = 1;
-    } else if(dirparam == bestvalue) {
+    } else if(value == bestvalue) {
       nbest++;
       if(coinflip(1.0/nbest))
         bestmove = d;
     }
-    fprintf(stderr, "%c:%d ", CDIRECTIONS[d], dirparam);
+    fprintf(stderr, "%c:%g(%d) ", CDIRECTIONS[d],
+            value, nsamples_[dir_base+d]);
   }
   fprintf(stderr, "\b] ");
   CheapMove(s, bestmove);
@@ -243,10 +231,13 @@ int Ant::GibbsStep(State &s)
     if(CheapMove(s, move)) {
       double value = s.evalScore + (dead_ ? 0 : moveScore_[move]);
 #ifdef BLAH
-      fprintf(stderr, "ant (%d,%d) %c=(%g%+g)=%g\n",
+      fprintf(stderr, "ant (%d,%d) %c=(%g%+g)=%g; ant=%g\n",
               origPos_.col, origPos_.row, CDIRECTIONS[move],
-              s.evalScore, moveScore_[move], value);
+              s.evalScore, moveScore_[move], value, scoreContrib_);
 #endif
+      rewardsum_[dir_base+move] += value;
+      nsamples_[dir_base+move]++;
+
       if(value != lastvalue)
         ndifferent++;
       if((minimize && value < bestvalue) ||
@@ -280,9 +271,16 @@ int Ant::GibbsStep(State &s)
 
   int move = SampleMove(s);
 #ifdef BLAH
-  fprintf(stderr, "ant (%d,%d) sampled_dir=%c value=%g\n",
+  fprintf(stderr, "ant (%d,%d) sampled_dir=%c value=%g (ant=%g)\n",
           origPos_.col, origPos_.row,
-          CDIRECTIONS[move], s.evalScore);
+          CDIRECTIONS[move], s.evalScore, scoreContrib_);
 #endif
   return move;
+}
+
+void Ant::UpdateScore(State &s)
+{
+  s.evalScore -= scoreContrib_;
+  scoreContrib_ = AntScore(s, this);
+  s.evalScore += scoreContrib_;
 }

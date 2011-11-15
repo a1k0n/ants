@@ -28,7 +28,10 @@ void Bot::playGame()
     state.updateDistanceInformation();
     // FIXME: this is a disaster
     for(int a=0; a<(int) state.myAnts.size(); a++) {
-      state.evalScore += AntScore(state, state.myAnts[a]);
+      state.myAnts[a]->UpdateScore(state);
+    }
+    for(int a=0; a<(int) state.enemyAnts.size(); a++) {
+      state.enemyAnts[a]->UpdateScore(state);
     }
     fprintf(stderr, "initial eval score: %g\n", state.evalScore);
     makeMoves();
