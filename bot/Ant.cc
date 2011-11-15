@@ -150,7 +150,7 @@ void Ant::CommitMove(State &s)
   }
   fprintf(stderr, "\b] ");
   CheapMove(s, bestmove);
-  double value = s.evalScore + moveScore_[bestmove];
+  double value = s.evalScore + (dead_ ? 0 : moveScore_[bestmove]);
   fprintf(stderr, "%c=(ant:%g + territory:%g)=%g ", CDIRECTIONS[bestmove],
           s.evalScore, moveScore_[bestmove], value);
   fprintf(stderr, "moving %c\n", CDIRECTIONS[bestmove]);
@@ -241,7 +241,7 @@ int Ant::GibbsStep(State &s)
 
   for(int move=0;move<5;move++) {
     if(CheapMove(s, move)) {
-      double value = s.evalScore + moveScore_[move];
+      double value = s.evalScore + (dead_ ? 0 : moveScore_[move]);
 #ifdef BLAH
       fprintf(stderr, "ant (%d,%d) %c=(%g%+g)=%g\n",
               origPos_.col, origPos_.row, CDIRECTIONS[move],
