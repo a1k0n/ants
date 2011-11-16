@@ -65,10 +65,8 @@ struct Ant
   void UpdateScore(State &s);
 
   bool CheckCombatDeath() {
-    double damage = 0;
     for(std::set<Ant*>::iterator i=enemies_.begin(); i != enemies_.end(); ++i) {
-      damage += 1.0/(*i)->nEnemies_;
-      if(damage >= 1)
+      if((*i)->nEnemies_ <= nEnemies_)
         return true;
     }
     return false;
