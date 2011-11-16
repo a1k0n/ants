@@ -7,8 +7,6 @@
 
 using namespace std;
 
-static const int kMaxTurnTime = 300;
-
 //constructor
 Bot::Bot()
 {
@@ -101,25 +99,19 @@ void Bot::makeMoves()
 
   fprintf(stderr, "initial score deltas computed; evalScore=%g\n", state.evalScore);
   // FIXME: time this stuff
-#if 0
-  for(int smp=0;smp<5000;smp++) {
-    for(size_t i=0;i<state.myAnts.size();i++)
-      state.myAnts[i]->GibbsStep(state);
-
-    for(size_t i=0;i<state.enemyAnts.size();i++)
-      state.enemyAnts[i]->GibbsStep(state);
-#else
   int Nmy = state.myAnts.size();
   int Nenemy = state.enemyAnts.size();
   int Nants = Nmy + Nenemy;
-  for(int smp=0;smp<5000*Nants;smp++) {
-    int i = lrand48()%Nants;
-    if(i < Nmy)
-      state.myAnts[i]->GibbsStep(state);
-    else
-      state.enemyAnts[i-Nmy]->GibbsStep(state);
-#endif
-    if(state.timer.getTime() > kMaxTurnTime)
+  int maxTurnTime = 95*state.turntime/100;
+  for(int smp=0;smp<5000;smp++) {
+    for(int j=0;j<Nants;j++) {
+      int i = lrand48()%Nants;
+      if(i < Nmy)
+        state.myAnts[i]->GibbsStep(state);
+      else
+        state.enemyAnts[i-Nmy]->GibbsStep(state);
+    }
+    if(state.timer.getTime() > maxTurnTime)
       break;
   }
 

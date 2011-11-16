@@ -37,7 +37,7 @@ static inline double ExploreScore(const State &state, const Square &sq) {
       score --;
   }
 #endif
-  score += kTieBreaker * pow(kDiscount, sq.distance[Square::DIST_FRONTIER]);
+  score += kTieBreaker * pow(0.99, sq.distance[Square::DIST_FRONTIER]);
   return score;
 }
 
