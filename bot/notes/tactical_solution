@@ -213,3 +213,73 @@ let's try it with a larger set of ants.
 
 yep.  works pretty well.  implemented, in the bot; replaced stupid ad-hoc
 forward-backward sweep with gibbs sampling.
+
+----
+
+okay, this stuff is starting to work pretty well but is bumping up against a
+fundamental misunderstanding of what we're modelling here.  we need to figure
+out what probability distribution we're actually sampling: the probability that
+move M will lead to a better outcome than any other move M' for that ant, given
+the moves of its two dependent ants.
+
+The current Dirichlet implementation solves that, sort of, except "better" is
+stated as an absolute -- if it's 1e-6 better in our samples, it still
+dominates.  We may need something smoother.
+
+Also, one of the ants in the dependency chain might need to choose a slightly
+lower-reward move for other ants to produce a much higher-reward move down the
+chain.  So we really need to compare scores before the entire Gibbs sweep with
+scores afterward.  Perhaps *this* is the criterion we need to be sampling from:
+
+  for all ants i:
+    if(state.evalScore > evalScore[i])
+      ant[i]->dirichlet[ant[i]->move]++
+    else
+      ??
+    evalScore[i] = state.evalScore
+    ant[i]->move = ant[i]->SampleMoveFromDirichlet()
+    ant[i]->CheapMove(ant->move)
+    ant[i]->UpdateScore()
+
+that probably won't work though... cuz a good move has to be repeatedly undone
+and redone for it to gain probability.  maybe that's good?  unknown.
+
+Instead, can we maintain/update a probability distribution of scores for each
+move, and sample based on that somehow?  maybe a normal distribution, and use
+some kinda erf() thing to compute multinomial probabilities for sampling?
+
+Say we have the following situation:
+
+move  score mu, score stddev
+   -    5.123   0.1
+   N    5.9     3.0
+   S    4.9     1.0
+   E    5.0     0.3
+   W    5.1     0.4
+
+which move is most likely to result in the largest expected reward?  well, N,
+clearly, but it appears risky.  if we're sampling moves, what is our
+distribution?  one way would be to draw a sample score from each move, and then
+choose the highest one.
+
+if we had quantized scores (and we do) we can keep entire score histories for
+each move and randomly sample them, and then choose the highest.  can we
+generate a multinomial directly from this, though, and get an easier sample
+with one random number?
+
+let's take the binomial base case:  two moves: A, B, score samples A[N],
+B[N].  well, duh, obviously the binomial probability is sum(A[i] > B[i] ? 1 : 0)/N.
+and this is exactly what we're doing with our Dirichlet stuff.  [actually it'd
+be sum_i,j(A[i] > B[j] ? 1 : 0)/N^2 if we assumed independence between scores
+but that would be silly]
+
+so the Dirichlet thing seems to be the correct approach in theory; the problem
+is that we're not able to propagate causality backwards.  we can't compare the
+effects of moves we didn't make.
+
+---
+
+in the end i've decided to keep things pretty much the same but randomize the
+order in which we sample ants.  this yields a stronger player; the order was
+biased before.  the kHillDefensePriority also seems to universally make things
+worse but it is unclear why.

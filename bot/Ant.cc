@@ -127,7 +127,7 @@ void Ant::CommitMove(State &s)
       continue;
 #if 1
     double value = dirichlet_[dir_base+d];
-#else
+#else // this is a terrible idea
     double value = rewardsum_[dir_base+d]/nsamples_[dir_base+d];
 #endif
     if(value > bestvalue) {
@@ -146,7 +146,7 @@ void Ant::CommitMove(State &s)
   CheapMove(s, bestmove);
   double value = s.evalScore + (dead_ ? 0 : moveScore_[bestmove]);
   fprintf(stderr, "%c=(ant:%g + territory:%g)=%g ", CDIRECTIONS[bestmove],
-          s.evalScore, moveScore_[bestmove], value);
+          scoreContrib_, moveScore_[bestmove], value);
   fprintf(stderr, "moving %c\n", CDIRECTIONS[bestmove]);
 
   committed_ = true;
@@ -202,10 +202,12 @@ int Ant::SampleMove(State &s)
   }
   // if over 93% of the probability mass is in this direction, we can probably
   // stop sampling here.
+#ifdef CONVERGENCE
   if(dirichlet_[dir_base+dir] > 15*fullsum/16) {
     // 15/16 = ~93%
     converged_[dir_base/5] = dir;
   }
+#endif
 #ifdef BLAH
   fprintf(stderr, "move=%d\n", dir);
 #endif

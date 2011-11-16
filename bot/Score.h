@@ -14,7 +14,7 @@
 const float kDiscount = 0.7; // should be < 1/sqrt(2) for forward progress?
 const float kFoodSpawnProb = 5.0/65536.0;
 const float kHillOffensePriority = 5.0;
-const float kHillDefensePriority = 10.0;
+const float kHillDefensePriority = 0; //0.0;
 const float kEnemyPriority = 1e-4;
 const float kTieBreaker = 1e-6;
 const float kMyAntValue = 5.0;
@@ -25,15 +25,19 @@ static inline double ExploreScore(const State &state, const Square &sq) {
   int turndelta = state.turn - sq.lastSeen;
   score += kFoodSpawnProb * turndelta *
     pow(kDiscount, sq.distance[Square::DIST_MY_ANTS]);
+#if 1
   if(sq.isHill && sq.hillPlayer == 0) {
     int enemy_dist = sq.distance[Square::DIST_ENEMY_ANTS];
     int my_dist = sq.distance[Square::DIST_MY_ANTS];
-    if(enemy_dist != INT_MAX && my_dist != INT_MAX)
-      score -= pow(kDiscount, my_dist - enemy_dist);
+    if(enemy_dist != INT_MAX && my_dist != INT_MAX) {
+      int dist_diff = std::max(-10, enemy_dist - my_dist);
+      score -= pow(kDiscount, dist_diff);
+    }
     if(sq.visibility == 0)
       score --;
   }
-  // + kTieBreaker * pow(kDiscount, sq.distance[Square::DIST_FRONTIER]);
+#endif
+  score += kTieBreaker * pow(kDiscount, sq.distance[Square::DIST_FRONTIER]);
   return score;
 }
 
@@ -70,14 +74,18 @@ static inline double AntScore(const State &state, const Ant *ant) {
     if(enemy_hill_dist != INT_MAX)
       score += kHillOffensePriority*pow(kDiscount, enemy_hill_dist);
     int enemy_ant_dist = sq.distance[Square::DIST_ENEMY_ANTS];
-    score += kEnemyPriority*pow(kDiscount, enemy_ant_dist);
+    if(enemy_ant_dist != INT_MAX)
+      score += kEnemyPriority*pow(kDiscount, enemy_ant_dist);
     return score;
   } else {
     // enemy ants near our hill == bad
     double score = -kEnemyAntValue;
+#if 0
+    // this has been found to be counterproductive but I'm not yet clear on why
     int my_hill_dist = sq.distance[Square::DIST_MY_HILLS];
     if(my_hill_dist != INT_MAX)
       score -= kHillDefensePriority*pow(kDiscount, my_hill_dist);
+#endif
     return score;
   }
 }
