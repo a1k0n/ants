@@ -102,7 +102,7 @@ void Bot::makeMoves()
   int Nmy = state.myAnts.size();
   int Nenemy = state.enemyAnts.size();
   int Nants = Nmy + Nenemy;
-  int maxTurnTime = 95*state.turntime/100;
+  int maxTurnTime = std::min(475.0, 95*state.turntime/100);
   for(int smp=0;smp<5000;smp++) {
     for(int j=0;j<Nants;j++) {
       int i = lrand48()%Nants;

@@ -7,6 +7,7 @@
 #include <float.h>
 
 //#define BLAH
+#define CONVERGENCE_CHECK
 
 bool Ant::TerritoryMove(State &s, int move)
 {
@@ -202,7 +203,7 @@ int Ant::SampleMove(State &s)
   }
   // if over 93% of the probability mass is in this direction, we can probably
   // stop sampling here.
-#ifdef CONVERGENCE
+#ifdef CONVERGENCE_CHECK
   if(dirichlet_[dir_base+dir] > 15*fullsum/16) {
     // 15/16 = ~93%
     converged_[dir_base/5] = dir;
