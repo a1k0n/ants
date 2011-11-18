@@ -283,3 +283,13 @@ in the end i've decided to keep things pretty much the same but randomize the
 order in which we sample ants.  this yields a stronger player; the order was
 biased before.  the kHillDefensePriority also seems to universally make things
 worse but it is unclear why.
+
+---
+
+FlagCapper's bot is still trouncing this approach tactically.  (and
+strategically but that's a separate issue).  There must be some more
+deterministic way to approach this, possibly combined with the conditional ant
+lattice thing.
+
+One possible fix is to make the dependencies circular in the grid, and run two
+passes maximizing moves.  Let's get that out of the way now and playtest.

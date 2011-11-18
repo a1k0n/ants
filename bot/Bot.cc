@@ -7,6 +7,8 @@
 
 using namespace std;
 
+static const int kNMaximizePasses = 2;
+
 //constructor
 Bot::Bot()
 {
@@ -54,9 +56,9 @@ static void AssignConditionalDependencies(vector<Ant*> &ants)
       if(j == i)
         continue;
       int dx = (ants[j]->pos_.col -
-                ants[i]->pos_.col),
+                ants[i]->pos_.col + Location::cols) % Location::cols,
           dy = (ants[j]->pos_.row -
-                ants[i]->pos_.row);
+                ants[i]->pos_.row + Location::rows) % Location::rows;
       //fprintf(stderr, "ant(%d) <-> ant(%d): dx=%d dy=%d\n", i, j, dx, dy);
       int dist = dx*dx + dy*dy;
       if(dx < 0 && dx < dy && dy <= -dx && dist < dist_left) {
@@ -114,6 +116,10 @@ void Bot::makeMoves()
     if(state.timer.getTime() > maxTurnTime)
       break;
   }
+
+  for(int j=0;j<kNMaximizePasses;j++)
+    for(size_t i=0;i<state.myAnts.size();i++)
+      state.myAnts[i]->MaximizeMove(state);
 
   for(size_t i=0;i<state.myAnts.size();i++)
     state.myAnts[i]->CommitMove(state);

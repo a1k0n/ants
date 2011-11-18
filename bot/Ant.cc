@@ -100,13 +100,16 @@ static bool coinflip(double c)
   return drand48() < c;
 }
 
-void Ant::CommitMove(State &s)
+void Ant::MaximizeMove(State &s)
 {
+#ifdef MULTIPASS
   if(committed_)
     return;
+#endif
   int dir_base = 0;
   double bestvalue = -DBL_MAX;
   int bestmove = 0, nbest = 0;
+#ifdef MULTIPASS
   if(dependUp_) {
     dependUp_->CommitMove(s);
     dir_base += 5*dependUp_->move_;
@@ -115,6 +118,7 @@ void Ant::CommitMove(State &s)
     dependLeft_->CommitMove(s);
     dir_base += 25*dependLeft_->move_;
   }
+#endif
   fprintf(stderr, "ant (%d,%d) (team %d): ",
           origPos_.col, origPos_.row, team_);
   fprintf(stderr, "maximizing dirichlet(dep=%c,%c, conv=%d)=[",
@@ -149,7 +153,10 @@ void Ant::CommitMove(State &s)
   fprintf(stderr, "%c=(ant:%g + territory:%g)=%g ", CDIRECTIONS[bestmove],
           scoreContrib_, moveScore_[bestmove], value);
   fprintf(stderr, "moving %c\n", CDIRECTIONS[bestmove]);
+}
 
+void Ant::CommitMove(State &s)
+{
   committed_ = true;
   s.CommitMove(origPos_, move_);
 }

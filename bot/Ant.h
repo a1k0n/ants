@@ -57,6 +57,7 @@ struct Ant
   int GibbsStep(State &s);
   int SampleMove(State &s);
 
+  void MaximizeMove(State &s);
   void CommitMove(State &s);
 
   // populate moveScore_
