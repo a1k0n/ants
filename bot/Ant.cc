@@ -57,7 +57,7 @@ bool Ant::CanMove(State &s, int move)
 {
   Location newpos = origPos_.next(move);
   Square &newsq = s.grid(newpos);
-  if(newsq.isWater) return false;
+  if(newsq.isWater || newsq.isFood) return false;
   if(newsq.nextAnt && newsq.nextAnt != this) return false;
   return true;
 }
