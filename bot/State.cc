@@ -120,8 +120,8 @@ void State::updateAntAttack(Ant *a)
         if(!sq.ant || sq.ant->team_ == a->team_)
           continue;
 
-        a->enemies_.insert(sq.ant);
-        sq.ant->enemies_.insert(a);
+        a->enemies_.push_back(sq.ant);
+        sq.ant->enemies_.push_back(a);
         a->nEnemies_++;
         sq.ant->nEnemies_++;
       }
@@ -387,6 +387,12 @@ void State::setAttackRadius(int radius2)
   }
 }
 
+template <class T>
+static inline void vector_remove(std::vector<T> &vec, const T &elem)
+{
+  vec.erase(std::remove(vec.begin(), vec.end(), elem), vec.end());
+}
+
 // move is the move direction; direction is 1 or -1 for forward or backward in
 // time (to do or undo a move, respectively)
 void State::doCombatMove(Ant *a, int move, int direction)
@@ -410,16 +416,16 @@ void State::doCombatMove(Ant *a, int move, int direction)
       // and using ^ instead of *
       if(adj.second*direction == 1) {
         // add combat pair
-        a->enemies_.insert(sq.nextAnt);
-        sq.nextAnt->enemies_.insert(a);
+        a->enemies_.push_back(sq.nextAnt);
+        sq.nextAnt->enemies_.push_back(a);
         a->nEnemies_++;
         sq.nextAnt->nEnemies_++;
       } else {
         // remove combat pair
-        assert(a->enemies_.find(sq.nextAnt) != a->enemies_.end());
-        assert(sq.nextAnt->enemies_.find(a) != sq.nextAnt->enemies_.end());
-        a->enemies_.erase(sq.nextAnt);
-        sq.nextAnt->enemies_.erase(a);
+        //assert(a->enemies_.find(sq.nextAnt) != a->enemies_.end());
+        //assert(sq.nextAnt->enemies_.find(a) != sq.nextAnt->enemies_.end());
+        vector_remove(a->enemies_, sq.nextAnt);
+        vector_remove(sq.nextAnt->enemies_, a);
         a->nEnemies_--;
         sq.nextAnt->nEnemies_--;
       }

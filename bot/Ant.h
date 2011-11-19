@@ -3,7 +3,7 @@
 
 #include "Location.h"
 
-#include <set>
+#include <vector>
 #include <stdio.h>
 
 struct State;
@@ -17,7 +17,7 @@ struct Ant
   int nEnemies_;
   bool dead_;
   bool committed_;
-  std::set<Ant*> enemies_;
+  std::vector<Ant*> enemies_;
 
   double scoreContrib_;
 
@@ -66,8 +66,8 @@ struct Ant
   void UpdateScore(State &s);
 
   bool CheckCombatDeath() {
-    for(std::set<Ant*>::iterator i=enemies_.begin(); i != enemies_.end(); ++i) {
-      if((*i)->nEnemies_ <= nEnemies_)
+    for(size_t i=0; i < enemies_.size(); ++i) {
+      if(enemies_[i]->nEnemies_ <= nEnemies_)
         return true;
     }
     return false;
@@ -75,11 +75,10 @@ struct Ant
 
   void dumpEnemies() {
     if(enemies_.empty()) return;
-    std::set<Ant*>::iterator i = enemies_.begin();
     fprintf(stderr, "enemies: ");
-    for(; i != enemies_.end(); ++i) {
-      Ant *e = *i;
-      Location l = e->pos_.prev(e->move_);
+    for(size_t i=0; i < enemies_.size(); ++i) {
+      Ant *e = enemies_[i];
+      Location l = e->origPos_;
       fprintf(stderr, "(%d,%d) ", l.col, l.row);
     }
     fprintf(stderr, "\n");
