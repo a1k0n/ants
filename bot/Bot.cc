@@ -7,7 +7,7 @@
 
 using namespace std;
 
-static const int kNMaximizePasses = 2;
+static const int kNMaximizePasses = 1;
 
 //constructor
 Bot::Bot()
@@ -56,10 +56,12 @@ static void AssignConditionalDependencies(vector<Ant*> &ants)
       if(j == i)
         continue;
       int dx = (ants[j]->pos_.col -
-                ants[i]->pos_.col + Location::cols) % Location::cols,
+                ants[i]->pos_.col),
           dy = (ants[j]->pos_.row -
-                ants[i]->pos_.row + Location::rows) % Location::rows;
-      //fprintf(stderr, "ant(%d) <-> ant(%d): dx=%d dy=%d\n", i, j, dx, dy);
+                ants[i]->pos_.row);
+#if 0
+      fprintf(stderr, "ant(%d) <-> ant(%d): dx=%d dy=%d\n", i, j, dx, dy);
+#endif
       int dist = dx*dx + dy*dy;
       if(dx < 0 && dx < dy && dy <= -dx && dist < dist_left) {
         closest_left = ants[j];

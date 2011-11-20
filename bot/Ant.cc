@@ -109,16 +109,18 @@ void Ant::MaximizeMove(State &s)
   int dir_base = 0;
   double bestvalue = -DBL_MAX;
   int bestmove = 0, nbest = 0;
-#ifdef MULTIPASS
   if(dependUp_) {
+#ifdef MULTIPASS
     dependUp_->CommitMove(s);
+#endif
     dir_base += 5*dependUp_->move_;
   }
   if(dependLeft_) {
+#ifdef MULTIPASS
     dependLeft_->CommitMove(s);
+#endif
     dir_base += 25*dependLeft_->move_;
   }
-#endif
   fprintf(stderr, "ant (%d,%d) (team %d): ",
           origPos_.col, origPos_.row, team_);
   fprintf(stderr, "maximizing dirichlet(dep=%c,%c, conv=%d)=[",
