@@ -6,6 +6,10 @@
 #include <vector>
 #include <stdio.h>
 
+// use conditional probabilities when sampling (seems to be weaker due to
+// limited sampling)
+#undef CONDITIONAL
+
 struct State;
 struct Ant
 {
@@ -24,28 +28,37 @@ struct Ant
   double moveScore_[5];
 
   // Dirichlet distribution of superior moves, obtained via Gibbs sampling
+#ifdef CONDITIONAL
   int dirichlet_[5*5*5];
-  double rewardsum_[5*5*5];
-  int converged_[5*5*5], nsamples_[5*5*5];
+  int converged_[5*5];
   // ants which we are conditionally dependent on
   Ant *dependUp_, *dependLeft_;
+#else
+  int dirichlet_[5];
+  int converged_[1];
+#endif
 
-  Ant() { dependUp_ = dependLeft_ = NULL;  Init(); }
+  Ant() { Init(); }
   Ant(int team, Location pos):team_(team), pos_(pos), origPos_(pos) {
-    dependUp_ = dependLeft_ = NULL; Init();
+    Init();
   }
 
   void Init() {
+#ifdef CONDITIONAL
+    dependUp_ = dependLeft_ = NULL;
+#endif
     scoreContrib_ = 0;
     move_ = 0; nEnemies_ = 0; dead_ = committed_ = false;
-    for(int j=0;j<5*5*5;j++) {
+#ifdef CONDITIONAL
+    for(int j=0;j<5*5*5;j++)
       dirichlet_[j] = 1;
-      rewardsum_[j] = 0;
-      nsamples_[j] = 0;
-    }
-    for(int j=0;j<5*5;j++) {
+    for(int j=0;j<5*5;j++)
       converged_[j] = -1;
-    }
+#else
+    for(int j=0;j<5;j++)
+      dirichlet_[j] = 1;
+    converged_[0] = -1;
+#endif
   }
 
   bool CanMove(State &s, int move);

@@ -14,6 +14,8 @@
 const float kDiscount = 0.7; // should be < 1/sqrt(2) for forward progress?
 const float kFoodSpawnProb = 5.0/65536.0;
 const float kHillOffensePriority = 5.0;
+const float kHillDiscount = 0.70;
+const float kExploreDiscount = 0.70;
 const float kHillDefensePriority = 10.0; //0.0;
 const float kEnemyPriority = 1e-4;
 const float kTieBreaker = 1e-6;
@@ -24,7 +26,7 @@ static inline double ExploreScore(const State &state, const Square &sq) {
   double score = 0;
   int turndelta = state.turn - sq.lastSeen;
   score += kFoodSpawnProb * turndelta *
-    pow(kDiscount, sq.distance[Square::DIST_MY_ANTS]);
+    pow(kExploreDiscount, sq.distance[Square::DIST_MY_ANTS]);
 #if 1
   if(sq.isHill && sq.hillPlayer == 0) {
     int enemy_dist = sq.distance[Square::DIST_ENEMY_ANTS];
@@ -72,7 +74,7 @@ static inline double AntScore(const State &state, const Ant *ant) {
 
     int enemy_hill_dist = sq.distance[Square::DIST_ENEMY_HILLS];
     if(enemy_hill_dist != INT_MAX)
-      score += kHillOffensePriority*pow(kDiscount, enemy_hill_dist);
+      score += kHillOffensePriority*pow(kHillDiscount, enemy_hill_dist);
     int enemy_ant_dist = sq.distance[Square::DIST_ENEMY_ANTS];
     if(enemy_ant_dist != INT_MAX)
       score += kEnemyPriority*pow(kDiscount, enemy_ant_dist);

@@ -1,3 +1,4 @@
+#include "Ant.h"
 #include "Bot.h"
 #include "Score.h"
 
@@ -47,6 +48,7 @@ void Bot::playGame()
 // ll*rr  l: dx < 0; dx < dy <= -dx
 // llddr
 // ldddd
+#ifdef CONDITIONAL
 static void AssignConditionalDependencies(vector<Ant*> &ants)
 {
   for(size_t i=0;i<ants.size();i++) {
@@ -84,6 +86,7 @@ static void AssignConditionalDependencies(vector<Ant*> &ants)
 #endif
   }
 }
+#endif
 
 //makes the bots moves for the turn
 void Bot::makeMoves()
@@ -95,8 +98,10 @@ void Bot::makeMoves()
   state.dumpDistances(Square::DIST_MY_ANTS);
 #endif
 
+#ifdef CONDITIONAL
   AssignConditionalDependencies(state.myAnts);
   AssignConditionalDependencies(state.enemyAnts);
+#endif
 
   for(size_t i=0;i<state.myAnts.size();i++)
     state.myAnts[i]->ComputeDeltaScores(state);

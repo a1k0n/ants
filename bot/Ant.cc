@@ -109,6 +109,7 @@ void Ant::MaximizeMove(State &s)
   int dir_base = 0;
   double bestvalue = -DBL_MAX;
   int bestmove = 0, nbest = 0;
+#ifdef CONDITIONAL
   if(dependUp_) {
 #ifdef MULTIPASS
     dependUp_->CommitMove(s);
@@ -121,6 +122,7 @@ void Ant::MaximizeMove(State &s)
 #endif
     dir_base += 25*dependLeft_->move_;
   }
+#endif
   fprintf(stderr, "ant (%d,%d) (team %d): ",
           origPos_.col, origPos_.row, team_);
   fprintf(stderr, "maximizing dirichlet(dep=%c,%c, conv=%d)=[",
@@ -130,13 +132,7 @@ void Ant::MaximizeMove(State &s)
   for(int d=0;d<5;d++) {
     if(!CanMove(s, d))
       continue;
-    if(!nsamples_[dir_base+d])
-      continue;
-#if 1
     double value = dirichlet_[dir_base+d];
-#else // this is a terrible idea
-    double value = rewardsum_[dir_base+d]/nsamples_[dir_base+d];
-#endif
     if(value > bestvalue) {
       bestvalue = value;
       bestmove = d;
@@ -146,8 +142,7 @@ void Ant::MaximizeMove(State &s)
       if(coinflip(1.0/nbest))
         bestmove = d;
     }
-    fprintf(stderr, "%c:%g(%d) ", CDIRECTIONS[d],
-            value, nsamples_[dir_base+d]);
+    fprintf(stderr, "%c:%g ", CDIRECTIONS[d], value);
   }
   fprintf(stderr, "\b] ");
   CheapMove(s, bestmove);
@@ -183,10 +178,12 @@ int Ant::SampleMove(State &s)
   int dir, sum=0, fullsum=0;
   bool can_move[5];
   int dir_base = 0;
+#ifdef CONDITIONAL
   if(dependUp_)
     dir_base += dependUp_->move_;
   if(dependLeft_)
     dir_base += 5*dependLeft_->move_;
+#endif
   if(converged_[dir_base] != -1) {
     dir = converged_[dir_base];
     // hopefully this is the common case
@@ -233,10 +230,12 @@ int Ant::GibbsStep(State &s)
   double lastvalue = bestvalue;
 
   int dir_base = 0;
+#ifdef CONDITIONAL
   if(dependUp_)
     dir_base += dependUp_->move_;
   if(dependLeft_)
     dir_base += 5*dependLeft_->move_;
+#endif
   if(converged_[dir_base] != -1) {
     int move = converged_[dir_base];
     // hopefully this is the common case
@@ -253,9 +252,6 @@ int Ant::GibbsStep(State &s)
               origPos_.col, origPos_.row, CDIRECTIONS[move],
               s.evalScore, moveScore_[move], value, scoreContrib_);
 #endif
-      rewardsum_[dir_base+move] += value;
-      nsamples_[dir_base+move]++;
-
       if(value != lastvalue)
         ndifferent++;
       if((minimize && value < bestvalue) ||
