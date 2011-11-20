@@ -430,7 +430,16 @@ void State::doCombatMove(Ant *a, int move, int direction)
         sq.nextAnt->nEnemies_--;
       }
       // update score for sq.nextAnt
-      sq.nextAnt->dead_ = sq.nextAnt->CheckCombatDeath();
+      sq.nextAnt->CheckCombatDeath();
+      // ...and any other affected ants
+      for(size_t i=0;i < sq.nextAnt->enemies_.size(); i++) {
+        Ant *b = sq.nextAnt->enemies_[i];
+        if(b == a)
+          continue;
+        b->CheckCombatDeath();
+        b->UpdateScore(*this);
+      }
+
       sq.nextAnt->UpdateScore(*this);
 #ifdef VERBOSE1
       fprintf(stderr, "%cpair[(%d,%d,p%d,d%d),(%d,%d,p%d,d%d)] ",
@@ -442,7 +451,7 @@ void State::doCombatMove(Ant *a, int move, int direction)
     }
   }
   // assume score update for a will be done afterwards
-  a->dead_ = a->CheckCombatDeath();
+  a->CheckCombatDeath();
 #ifdef VERBOSE1
   fprintf(stderr, "-> dead=%d\n", a->dead_);
 #endif

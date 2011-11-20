@@ -65,12 +65,14 @@ struct Ant
 
   void UpdateScore(State &s);
 
-  bool CheckCombatDeath() {
+  void CheckCombatDeath() {
     for(size_t i=0; i < enemies_.size(); ++i) {
-      if(enemies_[i]->nEnemies_ <= nEnemies_)
-        return true;
+      if(enemies_[i]->nEnemies_ <= nEnemies_) {
+        dead_ = true;
+        return;
+      }
     }
-    return false;
+    dead_ = false;
   }
 
   void dumpEnemies() {
