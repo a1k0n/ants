@@ -144,7 +144,8 @@ void Bot::makeMoves()
   int Nenemy = state.enemyAnts.size();
   int Nants = Nmy + Nenemy;
   int Nsamples = 5000*Nants;
-  for(int smp=0;smp<Nsamples && !_timed_out;smp++) {
+  int smp = 0;
+  for(smp=0;smp<Nsamples && !_timed_out;smp++) {
     int i = lrand48()%Nants;
     if(i < Nmy)
       state.myAnts[i]->GibbsStep(state);
@@ -159,7 +160,7 @@ void Bot::makeMoves()
   for(size_t i=0;i<state.myAnts.size();i++)
     state.myAnts[i]->CommitMove(state);
 
-  cerr << "time taken: " << elapsed_time() << "us\n";
+  cerr << smp << " move samples in " << elapsed_time() << "us\n";
 }
 
 //finishes the turn
