@@ -11,7 +11,8 @@
 
 // future-reward discount factor (usually gamma in reinforcement learning
 // literature)
-const float kDiscount = 0.7; // should be < 1/sqrt(2) for forward progress?
+const float kDiscount = 0.9; // should be < 1/sqrt(2) for forward progress?
+const float kFoodDiscount = 0.7; // should be < 1/sqrt(2) for forward progress?
 const float kFoodSpawnProb = 5.0/65536.0;
 const float kHillOffensePriority = 5.0;
 const float kHillDiscount = 0.70;
@@ -32,7 +33,7 @@ static inline double ExploreScore(const State &state, const Square &sq) {
     int enemy_dist = sq.distance[Square::DIST_ENEMY_ANTS];
     int my_dist = sq.distance[Square::DIST_MY_ANTS];
     if(enemy_dist != INT_MAX && my_dist != INT_MAX) {
-      int dist_diff = std::min(1, std::max(-10, enemy_dist - my_dist));
+      int dist_diff = std::min(1, std::max(-100, enemy_dist - my_dist));
       score -= pow(kDiscount, dist_diff);
     }
     if(sq.visibility == 0)
@@ -50,7 +51,7 @@ static inline double FoodScore(const State &state, const Square &sq) {
   // out, possibly based on the time-since-observed of the food making older
   // food more urgent, or something, to break the tie and to make sitting still
   // near food always bad.
-  return pow(kDiscount, sq.distance[Square::DIST_MY_ANTS] - 1);
+  return pow(kFoodDiscount, sq.distance[Square::DIST_MY_ANTS] - 1);
 }
 
 static inline double SquareScore(const State &state, const Square &sq) {
