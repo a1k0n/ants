@@ -107,7 +107,7 @@ void Ant::MaximizeMove(State &s)
     return;
 #endif
   int dir_base = 0;
-  double bestvalue = -DBL_MAX;
+  int bestvalue = INT_MIN;
   int bestmove = 0, nbest = 0;
 #ifdef CONDITIONAL
   if(dependUp_) {
@@ -123,16 +123,21 @@ void Ant::MaximizeMove(State &s)
     dir_base += 25*dependLeft_->move_;
   }
 #endif
-  fprintf(stderr, "ant (%d,%d) (team %d): ",
+  fprintf(stderr, "ant %3d,%3d p%d: ",
           origPos_.col, origPos_.row, team_);
-  fprintf(stderr, "maximizing dirichlet(dep=%c,%c, conv=%d)=[",
+#ifdef CONDITIONAL
+  fprintf(stderr, "maximizing dirichlet(dep=%c,%c conv=%2d)=[",
           CDIRECTIONS[(dir_base/5)%5],
           CDIRECTIONS[(dir_base/25)%5],
           converged_[dir_base/5]);
+#else
+  fprintf(stderr, "maximizing dirichlet(conv=%2d)=[",
+          converged_[dir_base/5]);
+#endif
   for(int d=0;d<5;d++) {
     if(!CanMove(s, d))
       continue;
-    double value = dirichlet_[dir_base+d];
+    int value = dirichlet_[dir_base+d];
     if(value > bestvalue) {
       bestvalue = value;
       bestmove = d;
@@ -142,14 +147,13 @@ void Ant::MaximizeMove(State &s)
       if(coinflip(1.0/nbest))
         bestmove = d;
     }
-    fprintf(stderr, "%c:%g ", CDIRECTIONS[d], value);
+    fprintf(stderr, "%c:%d ", CDIRECTIONS[d], value);
   }
   fprintf(stderr, "\b] ");
   CheapMove(s, bestmove);
   double value = s.evalScore + (dead_ ? 0 : moveScore_[bestmove]);
-  fprintf(stderr, "%c=(ant:%g + territory:%g)=%g ", CDIRECTIONS[bestmove],
-          scoreContrib_, moveScore_[bestmove], value);
-  fprintf(stderr, "moving %c\n", CDIRECTIONS[bestmove]);
+  fprintf(stderr, "(ant:%g + territory:%g)=%g %c\n", scoreContrib_,
+          moveScore_[bestmove], value, CDIRECTIONS[bestmove]);
 }
 
 void Ant::CommitMove(State &s)
