@@ -6,6 +6,7 @@
 #include <math.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
 
 using namespace std;
