@@ -390,7 +390,13 @@ void State::setAttackRadius(int radius2)
 template <class T>
 static inline void vector_remove(std::vector<T> &vec, const T &elem)
 {
-  vec.erase(std::remove(vec.begin(), vec.end(), elem), vec.end());
+  for(size_t i=0;i<vec.size();i++) {
+    if(vec[i] == elem) {
+      vec[i] = vec[vec.size()-1];
+      vec.pop_back();
+      return;
+    }
+  }
 }
 
 // move is the move direction; direction is 1 or -1 for forward or backward in
