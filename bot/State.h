@@ -15,7 +15,6 @@
 #include "Grid.h"
 #include "Location.h"
 #include "Square.h"
-#include "Timer.h"
 
 // struct to store current state information
 struct State
@@ -42,8 +41,6 @@ struct State
   std::vector<Ant*> antsInCombat;
 
   int nMyAntsKilled, nEnemyAntsKilled;
-
-  Timer timer;
 
   // Functions
   State();

@@ -517,7 +517,6 @@ istream& operator>>(istream &is, State &state)
       }
       else if(inputType == "ready") //end of parameter input
       {
-        state.timer.start();
         break;
       }
       else    //unknown line
@@ -582,8 +581,6 @@ istream& operator>>(istream &is, State &state)
       {
         if(state.gameover)
           is.setstate(std::ios::failbit);
-        else
-          state.timer.start();
         break;
       }
       else //unknown line

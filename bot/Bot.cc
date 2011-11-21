@@ -4,15 +4,46 @@
 
 #include <limits.h>
 #include <math.h>
+#include <signal.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 using namespace std;
 
 static const int kNMaximizePasses = 1;
 
+// {{{ run timing
+long _get_time()
+{
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return tv.tv_usec + tv.tv_sec*1000000;
+}
+
+static long _timer, _timeout;
+static volatile bool _timed_out = false;
+
+static void _alrm_handler(int sig) { _timed_out = true; }
+
+static void reset_timer(long t)
+{
+  _timer = _get_time();
+  itimerval timer;
+  memset(&timer, 0, sizeof(timer));
+  timer.it_value.tv_sec = t/1000000;
+  timer.it_value.tv_usec = t%1000000;
+  setitimer(ITIMER_REAL, &timer, NULL);
+  _timed_out = false;
+  _timeout = t;
+}
+
+static long elapsed_time() { return _get_time() - _timer; }
+// }}}
+
 //constructor
 Bot::Bot()
 {
+  signal(SIGALRM, _alrm_handler);
 }
 
 //plays a single game of Ants.
@@ -26,17 +57,18 @@ void Bot::playGame()
   //continues making moves while the game is not over
   while(cin >> state)
   {
+    int maxTurnTime = std::min(475.0, 95*state.turntime/100);
+    reset_timer(1000*maxTurnTime);
     state.updateVisionInformation();
     state.updateStateEstimate();
     state.updateDistanceInformation();
-    // FIXME: this is a disaster
+
     for(int a=0; a<(int) state.myAnts.size(); a++) {
       state.myAnts[a]->UpdateScore(state);
     }
     for(int a=0; a<(int) state.enemyAnts.size(); a++) {
       state.enemyAnts[a]->UpdateScore(state);
     }
-    fprintf(stderr, "initial eval score: %g\n", state.evalScore);
     makeMoves();
     endTurn();
   }
@@ -107,21 +139,17 @@ void Bot::makeMoves()
     state.myAnts[i]->ComputeDeltaScores(state);
 
   fprintf(stderr, "initial score deltas computed; evalScore=%g\n", state.evalScore);
-  // FIXME: time this stuff
+
   int Nmy = state.myAnts.size();
   int Nenemy = state.enemyAnts.size();
   int Nants = Nmy + Nenemy;
-  int maxTurnTime = std::min(475.0, 95*state.turntime/100);
-  for(int smp=0;smp<5000;smp++) {
-    for(int j=0;j<Nants;j++) {
-      int i = lrand48()%Nants;
-      if(i < Nmy)
-        state.myAnts[i]->GibbsStep(state);
-      else
-        state.enemyAnts[i-Nmy]->GibbsStep(state);
-    }
-    if(state.timer.getTime() > maxTurnTime)
-      break;
+  int Nsamples = 5000*Nants;
+  for(int smp=0;smp<Nsamples && !_timed_out;smp++) {
+    int i = lrand48()%Nants;
+    if(i < Nmy)
+      state.myAnts[i]->GibbsStep(state);
+    else
+      state.enemyAnts[i-Nmy]->GibbsStep(state);
   }
 
   for(int j=0;j<kNMaximizePasses;j++)
@@ -131,7 +159,7 @@ void Bot::makeMoves()
   for(size_t i=0;i<state.myAnts.size();i++)
     state.myAnts[i]->CommitMove(state);
 
-  cerr << "time taken: " << state.timer.getTime() << "ms; score=" << state.evalScore << endl << endl;
+  cerr << "time taken: " << elapsed_time() << "us\n";
 }
 
 //finishes the turn

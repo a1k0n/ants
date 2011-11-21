@@ -32,8 +32,8 @@ submit:
 
 # DO NOT DELETE
 
-Ant.o: Ant.h Location.h State.h Food.h Grid.h Square.h Timer.h Score.h
-Bot.o: Bot.h State.h Ant.h Location.h Food.h Grid.h Square.h Timer.h Score.h
+Ant.o: Ant.h Location.h State.h Food.h Grid.h Square.h Score.h
+Bot.o: Ant.h Location.h Bot.h State.h Food.h Grid.h Square.h Score.h
 Grid.o: Grid.h Location.h
-MyBot.o: Bot.h State.h Ant.h Location.h Food.h Grid.h Square.h Timer.h
-State.o: Score.h Square.h Ant.h Location.h State.h Food.h Grid.h Timer.h
+MyBot.o: Bot.h State.h Ant.h Location.h Food.h Grid.h Square.h
+State.o: Score.h Square.h Ant.h Location.h State.h Food.h Grid.h

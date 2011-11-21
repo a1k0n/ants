@@ -66,6 +66,8 @@ struct Ant
   // evaluate territory changes
   bool TerritoryMove(State &s, int move);
   // evaluate ant combat moves
+  bool CombatMove(State &s, int move);
+  // just mark the ant position in the grid
   bool CheapMove(State &s, int move);
   int GibbsStep(State &s);
   int SampleMove(State &s);

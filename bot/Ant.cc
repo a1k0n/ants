@@ -62,7 +62,7 @@ bool Ant::CanMove(State &s, int move)
   return true;
 }
 
-bool Ant::CheapMove(State &s, int move)
+bool Ant::CombatMove(State &s, int move)
 {
   if(move == move_)
     return true;
@@ -95,6 +95,29 @@ bool Ant::CheapMove(State &s, int move)
   return true;
 }
 
+bool Ant::CheapMove(State &s, int move)
+{
+  if(move == move_)
+    return true;
+  Square &oldsq = s.grid(pos_);
+
+  Location newpos = origPos_.next(move);
+  Square &newsq = s.grid(newpos);
+  if(newsq.isWater) return false;
+  if(newsq.nextAnt) return false;
+  assert(oldsq.nextAnt == this);
+
+  oldsq.nextAnt = NULL;
+  newsq.nextAnt = this;
+  pos_ = newpos;
+  move_ = move;
+
+  // scores aren't very meaningful things to know after we've committed our moves
+  // UpdateScore(s);
+
+  return true;
+}
+
 static bool coinflip(double c)
 {
   return drand48() < c;
@@ -123,6 +146,7 @@ void Ant::MaximizeMove(State &s)
     dir_base += 25*dependLeft_->move_;
   }
 #endif
+#ifdef VERBOSE0
   fprintf(stderr, "ant %3d,%3d p%d: ",
           origPos_.col, origPos_.row, team_);
 #ifdef CONDITIONAL
@@ -133,6 +157,7 @@ void Ant::MaximizeMove(State &s)
 #else
   fprintf(stderr, "maximizing dirichlet(conv=%2d)=[",
           converged_[dir_base/5]);
+#endif
 #endif
   for(int d=0;d<5;d++) {
     if(!CanMove(s, d))
@@ -147,13 +172,19 @@ void Ant::MaximizeMove(State &s)
       if(coinflip(1.0/nbest))
         bestmove = d;
     }
+#ifdef VERBOSE0
     fprintf(stderr, "%c:%d ", CDIRECTIONS[d], value);
+#endif
   }
+#ifdef VERBOSE0
   fprintf(stderr, "\b] ");
+#endif
   CheapMove(s, bestmove);
+#ifdef VERBOSE0
   double value = s.evalScore + (dead_ ? 0 : moveScore_[bestmove]);
   fprintf(stderr, "(ant:%g + territory:%g)=%g %c\n", scoreContrib_,
           moveScore_[bestmove], value, CDIRECTIONS[bestmove]);
+#endif
 }
 
 void Ant::CommitMove(State &s)
@@ -191,7 +222,7 @@ int Ant::SampleMove(State &s)
   if(converged_[dir_base] != -1) {
     dir = converged_[dir_base];
     // hopefully this is the common case
-    if(CheapMove(s, dir))
+    if(CombatMove(s, dir))
       return dir;
   }
   dir_base *= 5;
@@ -222,7 +253,7 @@ int Ant::SampleMove(State &s)
 #ifdef BLAH
   fprintf(stderr, "move=%d\n", dir);
 #endif
-  CheapMove(s, dir);
+  CombatMove(s, dir);
   return dir;
 }
 
@@ -243,13 +274,13 @@ int Ant::GibbsStep(State &s)
   if(converged_[dir_base] != -1) {
     int move = converged_[dir_base];
     // hopefully this is the common case
-    if(CheapMove(s, move))
+    if(CombatMove(s, move))
       return move;
   }
   dir_base *= 5;
 
   for(int move=0;move<5;move++) {
-    if(CheapMove(s, move)) {
+    if(CombatMove(s, move)) {
       double value = s.evalScore + (dead_ ? 0 : moveScore_[move]);
 #ifdef BLAH
       fprintf(stderr, "ant (%d,%d) %c=(%g%+g)=%g; ant=%g\n",
