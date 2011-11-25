@@ -73,9 +73,7 @@ void State::computeCircleDelta(const Location &delta,
                    ((x*x + y*y <= viewradius2) ? 1 : 0));
       if(delta != 0)
         adjust->push_back(make_pair(Location(y,x), delta));
-      fputc((x==0)&&(y==0)?'O':delta == 0 ? '.' : delta == -1 ? '-' : '+', stderr);
     }
-    fputc('\n', stderr);
   }
 }
 
@@ -369,7 +367,6 @@ void State::setViewRadius(int radius2)
   viewBoxSize = (int) sqrt(radius2);
   for(int m=0;m<TDIRECTIONS;m++) {
     visibilityAdjust[m].clear();
-    fprintf(stderr, "direction %c: view adjust\n", CDIRECTIONS[m]);
     computeCircleDelta(Location(DIRECTIONS[m][0], DIRECTIONS[m][1]),
                        &visibilityAdjust[m], viewBoxSize, viewradius2);
   }
@@ -381,7 +378,6 @@ void State::setAttackRadius(int radius2)
   attackBoxSize = (int) sqrt(radius2);
   for(int m=0;m<TDIRECTIONS;m++) {
     visibilityAdjust[m].clear();
-    fprintf(stderr, "direction %c: attack adjust\n", CDIRECTIONS[m]);
     computeCircleDelta(Location(DIRECTIONS[m][0], DIRECTIONS[m][1]),
                        &attackAdjust[m], attackBoxSize, attackradius2);
   }

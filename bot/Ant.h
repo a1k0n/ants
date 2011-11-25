@@ -6,6 +6,8 @@
 #include <vector>
 #include <stdio.h>
 
+static const int kDirichletAlpha = 1;
+
 // use conditional probabilities when sampling (seems to be weaker due to
 // limited sampling)
 #undef CONDITIONAL
@@ -51,7 +53,7 @@ struct Ant
     move_ = 0; nEnemies_ = 0; dead_ = committed_ = false;
 #ifdef CONDITIONAL
     for(int j=0;j<5*5*5;j++)
-      dirichlet_[j] = 1;
+      dirichlet_[j] = kDirichletAlpha;
     for(int j=0;j<5*5;j++)
       converged_[j] = -1;
 #else
