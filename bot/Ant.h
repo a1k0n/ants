@@ -5,12 +5,19 @@
 
 #include <vector>
 #include <stdio.h>
+#include <float.h>
 
 static const int kDirichletAlpha = 1;
 
-// use conditional probabilities when sampling (seems to be weaker due to
-// limited sampling)
-#undef CONDITIONAL
+// use probabilities conditional on the moves of the nearest "left" and "up"
+// ants when sampling
+#define CONDITIONAL
+
+// move policy: use minimax move value rather than expected best move
+//#define MINIMAX_VALUE
+
+#define VERBOSE0
+//#define BLAH
 
 struct State;
 struct Ant
@@ -33,11 +40,17 @@ struct Ant
 #ifdef CONDITIONAL
   int dirichlet_[5*5*5];
   int converged_[5*5];
+#ifdef MINIMAX_VALUE
+  double minvalue_[5*5*5];
+#endif
   // ants which we are conditionally dependent on
   Ant *dependUp_, *dependLeft_;
 #else
   int dirichlet_[5];
   int converged_[1];
+#ifdef MINIMAX_VALUE
+  double minvalue_[5];
+#endif
 #endif
 
   Ant() { Init(); }
@@ -52,13 +65,21 @@ struct Ant
     scoreContrib_ = 0;
     move_ = 0; nEnemies_ = 0; dead_ = committed_ = false;
 #ifdef CONDITIONAL
-    for(int j=0;j<5*5*5;j++)
+    for(int j=0;j<5*5*5;j++) {
       dirichlet_[j] = kDirichletAlpha;
+#ifdef MINIMAX_VALUE
+      minvalue_[j] = DBL_MAX;
+#endif
+    }
     for(int j=0;j<5*5;j++)
       converged_[j] = -1;
 #else
-    for(int j=0;j<5;j++)
+    for(int j=0;j<5;j++) {
       dirichlet_[j] = 1;
+#ifdef MINIMAX_VALUE
+      minvalue_[j] = DBL_MAX;
+#endif
+    }
     converged_[0] = -1;
 #endif
   }

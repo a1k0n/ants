@@ -130,7 +130,11 @@ void Ant::MaximizeMove(State &s)
     return;
 #endif
   int dir_base = 0;
+#ifdef MINIMAX_VALUE
+  double bestvalue = -DBL_MAX;
+#else
   int bestvalue = INT_MIN;
+#endif
   int bestmove = 0, nbest = 0;
 #ifdef CONDITIONAL
   if(dependUp_) {
@@ -162,7 +166,12 @@ void Ant::MaximizeMove(State &s)
   for(int d=0;d<5;d++) {
     if(!CanMove(s, d))
       continue;
+#ifdef MINIMAX_VALUE
+    // choose the move with the best minimum value
+    double value = minvalue_[dir_base+d];
+#else
     int value = dirichlet_[dir_base+d];
+#endif
     if(value > bestvalue) {
       bestvalue = value;
       bestmove = d;
@@ -173,7 +182,7 @@ void Ant::MaximizeMove(State &s)
         bestmove = d;
     }
 #ifdef VERBOSE0
-    fprintf(stderr, "%c:%d ", CDIRECTIONS[d], value);
+    fprintf(stderr, "%c:%g ", CDIRECTIONS[d], (double)value);
 #endif
   }
 #ifdef VERBOSE0
@@ -260,7 +269,7 @@ int Ant::SampleMove(State &s)
 int Ant::GibbsStep(State &s)
 {
   bool minimize = team_ == 0 ? false : true;
-  double bestvalue = minimize ? DBL_MAX : -DBL_MAX;
+  double bestvalue = -DBL_MAX;
   int bestmoves[5], nbest = 0, ndifferent = 0;
   double lastvalue = bestvalue;
 
@@ -282,15 +291,26 @@ int Ant::GibbsStep(State &s)
   for(int move=0;move<5;move++) {
     if(CombatMove(s, move)) {
       double value = s.evalScore + (dead_ ? 0 : moveScore_[move]);
+      if(minimize) value = -value;
+#ifdef MINIMAX_VALUE
+      minvalue_[dir_base+move] = std::min(value, minvalue_[dir_base+move]);
+#ifdef BLAH
+      fprintf(stderr, "ant (%d,%d) %c=(%g%+g)=%g min=%g; ant=%g best=%g\n",
+              origPos_.col, origPos_.row, CDIRECTIONS[move],
+              s.evalScore, moveScore_[move], value, minvalue_[dir_base+move],
+              scoreContrib_, bestvalue);
+      value = minvalue_[dir_base+move];
+#endif
+#else
 #ifdef BLAH
       fprintf(stderr, "ant (%d,%d) %c=(%g%+g)=%g; ant=%g\n",
               origPos_.col, origPos_.row, CDIRECTIONS[move],
               s.evalScore, moveScore_[move], value, scoreContrib_);
 #endif
+#endif
       if(value != lastvalue)
         ndifferent++;
-      if((minimize && value < bestvalue) ||
-         (!minimize && value > bestvalue)) {
+      if(value > bestvalue) {
         nbest = 0;
         bestvalue = value;
         bestmoves[nbest++] = move;
@@ -307,8 +327,8 @@ int Ant::GibbsStep(State &s)
       dirichlet_[dir_base+bestmoves[d]]++;
   }
 #ifdef BLAH
-  fprintf(stderr, "ant (%d,%d) dirichlet(dep=%c,%c)=[",
-          origPos_.col, origPos_.row,
+  fprintf(stderr, "ant (%d,%d) [nd=%d nb=%d b0=%c] dirichlet(dep=%c,%c)=[",
+          origPos_.col, origPos_.row, ndifferent, nbest, CDIRECTIONS[bestmoves[0]],
           CDIRECTIONS[(dir_base/5)%5],
           CDIRECTIONS[(dir_base/25)%5]);
   for(int d=0;d<5;d++) {
