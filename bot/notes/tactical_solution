@@ -293,3 +293,18 @@ lattice thing.
 
 One possible fix is to make the dependencies circular in the grid, and run two
 passes maximizing moves.  Let's get that out of the way now and playtest.
+
+---
+
+the circular grid implementation was kind of messed up and doesn't work.  maybe revisit it later.
+
+---
+
+i think one thing that might help a lot is to "prime" the sampler with certain
+states likely to be beneficial but unlikely to be sampled organically: all ants
+move toward nearest enemy, all ants move away from nearest enemy.  (maybe all
+ants move north, west, east, south too?  probably not actually beneficial)  so,
+for the 9 states in the powerset (my ants: -, toward, away) x (enemy: -,
+toward, away), do the move "goodness" check and update the dirichlet
+accordingly (maybe with some larger increment, or having alpha < 1?), and then
+do the normal gibbs sample step.

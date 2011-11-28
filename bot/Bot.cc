@@ -11,7 +11,7 @@
 
 using namespace std;
 
-static const int kNMaximizePasses = 1;
+static const int kNMaximizePasses = 2;
 
 // {{{ run timing
 long _get_time()
@@ -148,12 +148,19 @@ void Bot::makeMoves()
   int smp = 0;
   for(smp=0;smp<Nsamples && !_timed_out;smp++) {
     int i = lrand48()%Nants;
-    if(i < Nmy)
-      state.myAnts[i]->GibbsStep(state);
-    else
-      state.enemyAnts[i-Nmy]->GibbsStep(state);
+    if(i < Nmy) {
+      state.myAnts[i]->UpdateDirichlet(state);
+      state.myAnts[i]->SampleMove(state);
+    }
+    else {
+      state.enemyAnts[i-Nmy]->UpdateDirichlet(state);
+      state.enemyAnts[i-Nmy]->SampleMove(state);
+    }
   }
 
+  // the reason we might want to run multiple passes here is because the ants
+  // start out in a sampled state that might be blocking ideal moves for the
+  // early ants, so it's best to try again in case they moved out of the way.
   for(int j=0;j<kNMaximizePasses;j++)
     for(size_t i=0;i<state.myAnts.size();i++)
       state.myAnts[i]->MaximizeMove(state);

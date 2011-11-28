@@ -266,7 +266,7 @@ int Ant::SampleMove(State &s)
   return dir;
 }
 
-int Ant::GibbsStep(State &s)
+void Ant::UpdateDirichlet(State &s)
 {
   bool minimize = team_ == 0 ? false : true;
   double bestvalue = -DBL_MAX;
@@ -283,8 +283,8 @@ int Ant::GibbsStep(State &s)
   if(converged_[dir_base] != -1) {
     int move = converged_[dir_base];
     // hopefully this is the common case
-    if(CombatMove(s, move))
-      return move;
+    if(CanMove(s, move))
+      return;
   }
   dir_base *= 5;
 
@@ -324,7 +324,7 @@ int Ant::GibbsStep(State &s)
   // there should be more than 1 unique score for us to bother updating
   if(ndifferent > 1) {
     for(int d=0;d<nbest;d++)
-      dirichlet_[dir_base+bestmoves[d]]++;
+      dirichlet_[dir_base+bestmoves[d]] += kDirichletIncrement;
   }
 #ifdef BLAH
   fprintf(stderr, "ant (%d,%d) [nd=%d nb=%d b0=%c] dirichlet(dep=%c,%c)=[",
@@ -337,14 +337,6 @@ int Ant::GibbsStep(State &s)
   }
   fprintf(stderr, "\b] ");
 #endif
-
-  int move = SampleMove(s);
-#ifdef BLAH
-  fprintf(stderr, "ant (%d,%d) sampled_dir=%c value=%g (ant=%g)\n",
-          origPos_.col, origPos_.row,
-          CDIRECTIONS[move], s.evalScore, scoreContrib_);
-#endif
-  return move;
 }
 
 void Ant::UpdateScore(State &s)

@@ -8,6 +8,7 @@
 #include <float.h>
 
 static const int kDirichletAlpha = 1;
+static const int kDirichletIncrement = 10;
 
 // use probabilities conditional on the moves of the nearest "left" and "up"
 // ants when sampling
@@ -92,7 +93,7 @@ struct Ant
   bool CombatMove(State &s, int move);
   // just mark the ant position in the grid
   bool CheapMove(State &s, int move);
-  int GibbsStep(State &s);
+  void UpdateDirichlet(State &s);
   int SampleMove(State &s);
 
   void MaximizeMove(State &s);
