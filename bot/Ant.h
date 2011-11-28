@@ -17,7 +17,7 @@ static const int kDirichletIncrement = 1;
 // move policy: use minimax move value rather than expected best move
 //#define MINIMAX_VALUE
 
-#define VERBOSE0
+//#define VERBOSE0
 //#define BLAH
 
 struct State;

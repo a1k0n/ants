@@ -146,6 +146,7 @@ void Bot::makeMoves()
   int Nants = Nmy + Nenemy;
   int Nsamples = 5000*Nants;
   int smp = 0;
+
   if(Nenemy > 0) {
     // generate all (my ants: toward enemy, stay put, away from enemy) x
     // (enemy: toward me, stay put, away from me) combations of initial ant
@@ -167,6 +168,7 @@ void Bot::makeMoves()
       }
     }
   }
+
   for(smp=0;smp<Nsamples && !_timed_out;smp++) {
     int i = lrand48()%Nants;
     if(i < Nmy) {

@@ -15,11 +15,11 @@ const float kDiscount = 0.9; // should be < 1/sqrt(2) for forward progress?
 const float kFoodDiscount = 0.7; // should be < 1/sqrt(2) for forward progress?
 const float kFoodSpawnProb = 5.0/65536.0;
 const float kHillOffensePriority = 5.0;
-const float kHillDiscount = 0.70;
+const float kHillDiscount = 0.90;
 const float kExploreDiscount = 0.70;
 const float kHillDefensePriority = 10.0; //0.0;
-const float kEnemyPriority = 1e-4;
-const float kTieBreaker = 1e-6;
+const float kEnemyPriority = 1e-2;
+const float kTieBreaker = 1e-3;
 const float kMyAntValue = 5.0;
 const float kEnemyAntValue = 1.0;
 
@@ -40,7 +40,6 @@ static inline double ExploreScore(const State &state, const Square &sq) {
       score --;
   }
 #endif
-  score += kTieBreaker * pow(0.99, sq.distance[Square::DIST_FRONTIER]);
   return score;
 }
 
@@ -72,6 +71,9 @@ static inline double AntScore(const State &state, const Ant *ant) {
   // dies, we gain/lose those points
   if(ant->team_ == 0) {
     double score = kMyAntValue;
+
+    double tiebreaker = kTieBreaker * pow(0.99, sq.distance[Square::DIST_FRONTIER]);
+    score += tiebreaker;
 
     int enemy_hill_dist = sq.distance[Square::DIST_ENEMY_HILLS];
     if(enemy_hill_dist != INT_MAX)
