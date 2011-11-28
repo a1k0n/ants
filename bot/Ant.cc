@@ -118,6 +118,33 @@ bool Ant::CheapMove(State &s, int move)
   return true;
 }
 
+void Ant::MoveTowardEnemy(State &s, int dir)
+{
+  if(dir == 0)
+    CombatMove(s, 0);
+  int best_enemy_dist = INT_MAX;
+  int best_move = 0;
+  moving_ = true;
+  for(int move=1;move<5;move++) {
+    Location newpos = origPos_.next(move);
+    Square &newsq = s.grid(newpos);
+    if(newsq.isWater || newsq.isFood) continue;
+    if(newsq.nextAnt && newsq.nextAnt != this) {
+      // attempt to recursively move ants out of the way
+      if(!newsq.nextAnt->moving_ && newsq.nextAnt->team_ == team_)
+        newsq.nextAnt->MoveTowardEnemy(s, dir);
+      if(newsq.nextAnt && newsq.nextAnt != this) continue; // they're still in the way; give up
+    }
+    int dist = dir * newsq.distance[team_ == 0 ? Square::DIST_ENEMY_ANTS : Square::DIST_MY_ANTS];
+    if(dist < best_enemy_dist) {
+      best_enemy_dist = dist;
+      best_move = move;
+    }
+  }
+  CombatMove(s, best_move);
+  moving_ = false;
+}
+
 static bool coinflip(double c)
 {
   return drand48() < c;

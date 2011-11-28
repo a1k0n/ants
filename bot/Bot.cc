@@ -146,6 +146,27 @@ void Bot::makeMoves()
   int Nants = Nmy + Nenemy;
   int Nsamples = 5000*Nants;
   int smp = 0;
+  if(Nenemy > 0) {
+    // generate all (my ants: toward enemy, stay put, away from enemy) x
+    // (enemy: toward me, stay put, away from me) combations of initial ant
+    // positions, and initialize the Dirichlet distributions accordingly
+    for(int my_dir = -1; my_dir <= 1; my_dir ++) {
+      for(int i=0;i<Nmy;i++) state.myAnts[i]->MoveTowardEnemy(state, my_dir);
+      for(int enemy_dir = -1; enemy_dir <= 1; enemy_dir ++) {
+        for(int j=0;j<Nenemy;j++) {
+          state.enemyAnts[j]->MoveTowardEnemy(state, enemy_dir);
+          int m = state.enemyAnts[j]->move_;
+          state.enemyAnts[j]->UpdateDirichlet(state);
+          state.enemyAnts[j]->CombatMove(state, m); // put the ant back after the destructive dirichlet update
+        }
+        for(int i=0;i<Nmy;i++) {
+          int m = state.myAnts[i]->move_;
+          state.myAnts[i]->UpdateDirichlet(state);
+          state.myAnts[i]->CombatMove(state, m);
+        }
+      }
+    }
+  }
   for(smp=0;smp<Nsamples && !_timed_out;smp++) {
     int i = lrand48()%Nants;
     if(i < Nmy) {

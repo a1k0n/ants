@@ -8,7 +8,7 @@
 #include <float.h>
 
 static const int kDirichletAlpha = 1;
-static const int kDirichletIncrement = 10;
+static const int kDirichletIncrement = 1;
 
 // use probabilities conditional on the moves of the nearest "left" and "up"
 // ants when sampling
@@ -30,7 +30,7 @@ struct Ant
   int move_;
   int nEnemies_;
   bool dead_;
-  bool committed_;
+  bool committed_, moving_;
   std::vector<Ant*> enemies_;
 
   double scoreContrib_;
@@ -64,7 +64,7 @@ struct Ant
     dependUp_ = dependLeft_ = NULL;
 #endif
     scoreContrib_ = 0;
-    move_ = 0; nEnemies_ = 0; dead_ = committed_ = false;
+    move_ = 0; nEnemies_ = 0; dead_ = committed_ = moving_ = false;
 #ifdef CONDITIONAL
     for(int j=0;j<5*5*5;j++) {
       dirichlet_[j] = kDirichletAlpha;
@@ -95,6 +95,8 @@ struct Ant
   bool CheapMove(State &s, int move);
   void UpdateDirichlet(State &s);
   int SampleMove(State &s);
+
+  void MoveTowardEnemy(State &s, int direction);
 
   void MaximizeMove(State &s);
   void CommitMove(State &s);
