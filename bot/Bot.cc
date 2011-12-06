@@ -149,6 +149,7 @@ void Bot::makeMoves()
   int Nsamples = 5000*Nants;
   int smp = 0;
 
+#ifdef MOVEGEN
   if(Nenemy > 0) {
     // generate all (my ants: toward enemy, stay put, away from enemy) x
     // (enemy: toward me, stay put, away from me) combations of initial ant
@@ -170,6 +171,7 @@ void Bot::makeMoves()
       }
     }
   }
+#endif
 
   for(smp=0;smp<Nsamples && !_timed_out;smp++) {
     int i = lrand48()%Nants;
