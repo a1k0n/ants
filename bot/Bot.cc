@@ -124,8 +124,10 @@ static void AssignConditionalDependencies(vector<Ant*> &ants)
 //makes the bots moves for the turn
 void Bot::makeMoves()
 {
+#ifdef VERBOSE0
   fprintf(stderr, "turn %d:\n", state.turn);
   cerr << state << endl;
+#endif
 
 #ifdef VERBOSE
   state.dumpDistances(Square::DIST_MY_ANTS);
