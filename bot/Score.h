@@ -15,11 +15,11 @@ const float kDiscount = 0.9; // should be < 1/sqrt(2) for forward progress?
 const float kFoodDiscount = 0.7; // should be < 1/sqrt(2) for forward progress?
 const float kFoodSpawnProb = 5.0/65536.0;
 const float kHillOffensePriority = 5.0;
-const float kHillDiscount = 0.90;
+const float kHillDiscount = 0.70;
 const float kExploreDiscount = 0.70;
 const float kHillDefensePriority = 10.0; //0.0;
-const float kEnemyPriority = 1e-2;
-const float kTieBreaker = 1e-3;
+const float kEnemyPriority = 1e-4;
+const float kTieBreaker = 1e-6;
 const float kMyAntValue = 5.0;
 const float kEnemyAntValue = 1.0;
 
