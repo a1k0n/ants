@@ -232,7 +232,10 @@ void Ant::CommitMove(State &s)
 void Ant::ComputeDeltaScores(State &s)
 {
   assert(pos_ == origPos_); // can't have moved yet to compute this
-  double baseScore = s.evalScore;
+  // Tweak: since these scores are based solely on exploration and food
+  // collection, penalize standing still as if it keeps you two turns further
+  // away
+  double baseScore = s.evalScore * kFoodDiscount*kFoodDiscount;
   for(int i=4;i>=0;i--) { // 0 has to come last
     TerritoryMove(s, i);
     moveScore_[i] = s.evalScore - baseScore;
@@ -242,6 +245,7 @@ void Ant::ComputeDeltaScores(State &s)
             CDIRECTIONS[i], moveScore_[i]);
 #endif
   }
+  moveScore_[0] = baseScore;
 }
 
 int Ant::SampleMove(State &s)
