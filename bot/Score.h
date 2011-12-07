@@ -28,18 +28,6 @@ static inline double ExploreScore(const State &state, const Square &sq) {
   int turndelta = state.turn - sq.lastSeen;
   score += kFoodSpawnProb * turndelta *
     pow(kExploreDiscount, sq.distance[Square::DIST_MY_ANTS]);
-#if 1
-  if(sq.isHill && sq.hillPlayer == 0) {
-    int enemy_dist = sq.distance[Square::DIST_ENEMY_ANTS];
-    int my_dist = sq.distance[Square::DIST_MY_ANTS];
-    if(enemy_dist != INT_MAX && my_dist != INT_MAX) {
-      int dist_diff = std::min(1, std::max(-100, enemy_dist - my_dist));
-      score -= pow(kDiscount, dist_diff);
-    }
-    if(sq.visibility == 0)
-      score --;
-  }
-#endif
   return score;
 }
 

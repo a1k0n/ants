@@ -64,12 +64,6 @@ void Bot::playGame()
     state.updateStateEstimate();
     state.updateDistanceInformation();
 
-    for(int a=0; a<(int) state.myAnts.size(); a++) {
-      state.myAnts[a]->UpdateScore(state);
-    }
-    for(int a=0; a<(int) state.enemyAnts.size(); a++) {
-      state.enemyAnts[a]->UpdateScore(state);
-    }
     makeMoves();
     endTurn();
   }
@@ -140,6 +134,13 @@ void Bot::makeMoves()
 
   for(size_t i=0;i<state.myAnts.size();i++)
     state.myAnts[i]->ComputeDeltaScores(state);
+
+  for(int a=0; a<(int) state.myAnts.size(); a++) {
+    state.myAnts[a]->UpdateScore(state);
+  }
+  for(int a=0; a<(int) state.enemyAnts.size(); a++) {
+    state.enemyAnts[a]->UpdateScore(state);
+  }
 
   fprintf(stderr, "initial score deltas computed; evalScore=%g\n", state.evalScore);
 
